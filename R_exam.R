@@ -17,3 +17,5 @@ names(supermarkets)
 
 ##PARTIE 1: STATISTIQUE DESCRIPTIVE
 
+average_all <- colMeans(supermarkets[,c(2:11,15:44)])
+average_all
