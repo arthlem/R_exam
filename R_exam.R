@@ -19,3 +19,11 @@ names(supermarkets)
 
 average_all <- colMeans(supermarkets[,c(2:11,15:44)])
 average_all
+#Changer les marges pour les graphiques
+old.mar<-par("mar")
+par(mar=c(5,10,4,2))
+#Boxplot de tout mais trop de variables donc illisibles
+boxplot(supermarkets[,c(2:11,15:44)], horizontal = TRUE, outline = FALSE,las=2)
+#Boxplot par catégorie (distance_shop1-5)
+boxplot(supermarkets[,c(15,21,27,33,39)], horizontal = TRUE, outline = FALSE,las=2)
+
