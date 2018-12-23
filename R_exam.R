@@ -1,4 +1,4 @@
-# GIT
+#---------------------------------------------GITHUB-------------------------------------------------
 #Lors de changements
 #1. git add .
 #2. git commit -m "Le message a envoyer"
@@ -6,13 +6,22 @@
 
 #Pour récupérer les changements
 #git pull
-#
 
-##CHARGEMENT DES DONNEES
+#-------------------------------------------SUPERMARKETS-------------------------------------------------
 
-supermarkets <- read.csv2(file.choose(), header=TRUE, sep=",", dec=".") #charger le fichier CSV
-#Commande pour afficher le CSV des supermarchés
-View(supermarkets)
+#IMPORT THE DATA
+supermarkets <- read.csv2(file.choose(), header=TRUE, sep=",", dec=".") #Load CSV File
+
+#INSPECT THE DATA
+#Check the first part of the data
+head(supermarkets)
+#Check the last part of the data
+tail(supermarkets)
+
+#View all the data
+#View(supermarkets)
+
+#View the different column names of the data and their column number
 names(supermarkets)
 
 ##PARTIE 1: STATISTIQUE DESCRIPTIVE
@@ -20,13 +29,51 @@ names(supermarkets)
 average_all <- colMeans(supermarkets[,c(2:11,15:44)])
 average_all
 #Changer les marges pour les graphiques
-old.mar<-par("mar")
-par(mar=c(5,10,4,2))
-#Boxplot de tout mais trop de variables donc illisibles
-boxplot(supermarkets[,c(2:11,15:44)], horizontal = TRUE, outline = FALSE,las=2)
+par(mar=c(5,4,4,2))
+
+#par(mar=c(5,10,4,2)) -> important quand il y a beaucoup de données
+
+colnames(supermarkets)[20] <- c("avg price shop1")
+
 #Boxplot par catégorie (distance_shop1-5)
-boxplot(supermarkets[,c(15,21,27,33,39)], horizontal = TRUE, outline = FALSE,las=2)
+boxplot(supermarkets[,c(15,21,27,33,39)], main= "Distance to shop", horizontal = TRUE, outline = FALSE,las=2)
+
+#Shop 1-5 Products Purchased
+boxplot(supermarkets[,c(16,22,28,34,40)], main= "Products Purchased", horizontal = TRUE, outline = FALSE,las=2)
+
+#Shop 1-5 Unique products purchased
+boxplot(supermarkets[,c(17,23,29,35,41)], main= "Unique Products Purchased", horizontal = TRUE, outline = FALSE,las=2)
+
+#Shop 1-5 Amount purchases shops
+boxplot(supermarkets[,c(18,24,30,36,42)], main= "Amount purchases per shop", horizontal = TRUE, outline = FALSE,las=2)
+
+#Shop 1-5 Average purchased
+boxplot(supermarkets[,c(19,25,31,37,43)], main= "Average purchased", horizontal = TRUE, outline = FALSE,las=2)
+
+#Shop 1-5 Average price per Shop
+boxplot(supermarkets[,c(20,26,32,38,44)], main= "Average price per shop", horizontal = TRUE, outline = FALSE,las=2)
+
+#-----SUMMARY PER SHOP-----
+#Shop 1
+Shop_1<-supermarkets[,c(15:20)]
+summary(Shop_1)
+
+#Shop 2
+Shop_2<-supermarkets[,c(21:26)]
+summary(Shop_2)
+
+#Shop 3
+Shop_3<-supermarkets[,c(27:32)]
+summary(Shop_3)
+
+#Shop 4
+Shop_4<-supermarkets[,c(33:38)]
+summary(Shop_4)
+
+#Shop 5
+Shop_5<-supermarkets[,c(39:44)]
+summary(Shop_5)
+
 #Overview of products bougth
-par(mar=old.mar)
 boxplot(supermarkets[,c(2)], main="Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(3)], main="Unique Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
