@@ -27,5 +27,6 @@ boxplot(supermarkets[,c(2:11,15:44)], horizontal = TRUE, outline = FALSE,las=2)
 #Boxplot par catégorie (distance_shop1-5)
 boxplot(supermarkets[,c(15,21,27,33,39)], horizontal = TRUE, outline = FALSE,las=2)
 #Overview of products bougth
+par(mar=old.mar)
 boxplot(supermarkets[,c(2)], main="Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(3)], main="Unique Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
