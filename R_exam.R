@@ -104,5 +104,6 @@ boxplot(supermarkets[,c(10)], main="Max distance to shops", horizontal = TRUE, o
 
 #PCA
 #Pour pouvoir utiliser le PCA il faut charger la libraire "ade4"
+# install.packages("ade4")
 library(ade4)
 #Analyser le script ACP-PCA du prof, normalement à partir de la ligne 74
