@@ -101,3 +101,8 @@ boxplot(supermarkets[,c(7)], main="Shops Used", horizontal = TRUE, outline = FAL
 boxplot(supermarkets[,c(8)], main="Average distance to shops", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(9)], main="Min distance to shops", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(10)], main="Max distance to shops", horizontal = TRUE, outline = FALSE, las=2)
+
+#PCA
+#Pour pouvoir utiliser le PCA il faut charger la libraire "ade4"
+library(ade4)
+#Analyser le script ACP-PCA du prof, normalement à partir de la ligne 74
