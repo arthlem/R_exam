@@ -91,6 +91,13 @@ summary(Shop_4)
 Shop_5<-supermarkets[,c(39:44)]
 summary(Shop_5)
 
-#Overview of products bougth
+#Overview of the boxplots: déterminet lesquels nous allons utiliser
 boxplot(supermarkets[,c(2)], main="Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(3)], main="Unique Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(4)], main="Amount Purchases", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(5)], main="Average Purchase", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(6)], main="Average Price", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(7)], main="Shops Used", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(8)], main="Average distance to shops", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(9)], main="Min distance to shops", horizontal = TRUE, outline = FALSE, las=2)
+boxplot(supermarkets[,c(10)], main="Max distance to shops", horizontal = TRUE, outline = FALSE, las=2)
