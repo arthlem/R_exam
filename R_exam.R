@@ -29,6 +29,8 @@ distances <- supermarkets[c(8,9,10)]
 prices <- supermarkets[c(5,6)]
 
 purchases <- supermarkets[c(2,3,4)]
+View(purchases)
+clients_of_the_shop_3 <- supermarkets[ which(supermarkets$amount_purchases_shop_3 > 0), ]
 
 boxplot(distances, main= "Distances", horizontal = TRUE, outline = FALSE,las=2)
 par(mar=c(5,10,4,2))
@@ -107,3 +109,106 @@ boxplot(supermarkets[,c(10)], main="Max distance to shops", horizontal = TRUE, o
 # install.packages("ade4")
 library(ade4)
 #Analyser le script ACP-PCA du prof, normalement à partir de la ligne 74
+#Centrer et réduire les données
+measures <- supermarkets[ , c(2,4,5,7,13)]
+measures.CR<-scale(measures, center = TRUE, scale = TRUE)
+View(measures.CR)
+
+install.packages("rgl") 
+# Chargement de package dans le syst?me:
+library(rgl)
+
+Covar<-cov(measures.CR)
+
+# L'affichage est facultatif car la covariance est moins directement 
+# interpr?table que la corr?lation.
+# Les covariance donnent une mesure de la fa?on dont les variables
+# varient les unes par rapport aux autres: comment elles covarient.
+# Les cor?lations sont calcul?es ? partir des covariances et variances.
+
+# Les variances sont sur la diagonale de la matrice de variance-covariance:
+# La diagonale d'une matrice est directement accessible via la fonction diag():
+diag(Covar)
+# La variance totale est la somme des variances des diff?rentes variables
+# originelles. Cette variance totale (aussi appel?e inertie) servira de
+# mesure de r?f?rence pour la mesure de la perte d'information durant l'ACP.
+# Cette variance totale se calcule simplement en faisant la somme (fonction 
+# sum()) de la diagonale de la matrice de variance-covariance :
+total.var<-sum(diag(Covar))
+
+# Calcul des valeurs propres de la matrice de covariance
+my.eig<-eigen(Covar)
+# Les valeurs propres
+my.eig$values
+# Les vecteurs propres
+my.eig$vectors
+
+# Une caract?ristique des vecteurs propres et valeurs propres est que 
+# la matrice diagonale constitu?e des valeur propres repr?sente la 
+# m?me "information" (ici la variance-covariance des donn?es) que la
+# matrice originale, MAIS dans le nouveau syst?me de  variables.
+# De plus les traces des deux matrices sont ?gales. Cette information 
+# reste donc inchang?e par le changement de coordonn?es.
+# On peut donc mesurer l'information (variance) concentr?e sur chacune 
+# de ces nouvelles variables ? partir de la variance totale calcul?e plus
+# haut:
+my.eig$values/total.var
+
+# Comme les nouvelles variables (composantes, vect. pr.) sont class?es
+# par ordre d?croissant de variances (valeur pr.) on peut calculer
+# la quantit? d'information contenue de fa?on cumulative dans les 
+# x premi?res composantes : 
+cumsum(my.eig$values/total.var)
+Q<-my.eig$vectors # matrice de transformation
+Qinv<-solve(Q) # Inverse de Q
+yinMypc<-t(Qinv%*% t(measures.CR)) # On passe via des transpos?es car en Alg?bre
+# les coordonn?es sont des vecteurs colonnes
+# alors que nos donn?es sont habituellement 
+# stock?es de telle fa?on que les valeurs
+# (coordonn?es dans l'espace originel) sont 
+# stock?es sous forme de lignes.
+cols=c("blue", "red", "green", "pink")
+plot(yinMypc[,1:2],col=cols) # On plot les 2 premi?res composantes des tortues
+abline(v=0,h=0) # on ajoutes les nouveaux axes
+?plot
+
+pca.r <- princomp(measures.CR)
+# On stocke le r?sultat dans une variable car princomp calcule
+# plusieurs choses (cf. ci-dessus).
+# Pour avoir un r?sum? de l'ACP:
+summary(pca.r)
+?princomp
+# Attention la premi?re ligne de la commande ci-dessus donne, non pas 
+# les variances (!) mais bien les ?cart-types, c?d les racines carr?es
+# des premi?res.
+# La commande ci-dessus est l'?quivalent des trois commandes suivantes:
+# sqrt(my.eig$values)
+# my.eig$values/sum(my.eig$values)
+# cumsum(my.eig$values/sum(my.eig$values))
+
+# Comme un petit dessin vaut mieux qu'un long discours on donne souvent 
+# un barplot des valeurs propres. Ce graphe est appel? screeplot ou encore 
+# graphe des ?boulis:
+plot(pca.r) # shows a screeplot.
+loadings(pca.r)  # note that blank entries are small but not zero
+## The signs of the columns are arbitrary
+
+# C'est l'information que nous avions en affichant les vecteurs propres : 
+#my.eig$vectors
+
+# Enfin la commande biplot() permet enfin de dessiner les projections des 
+# donn?es sur les 2 premi?res composantes ainsi que les projections sur ces
+# deux composantes des variables originales:
+biplot(pca.r)
+
+# En r?sum? une ACP avec les outils de base de R se r?sume, pour les donn?es
+# tortues tient donc dans les commandes suivantes:
+
+pairs(measures) # si opportun par rapport au nombre de variables
+cor(measures) # informatif
+pca.r <- princomp(measures) # ACP
+summary(pca.r) # valeurs propres et % d'infos dans les composantes
+plot(pc.cr)  # idem mais visuellement
+loadings(pca.r) # poids des variables originelles dans les composantes
+biplot(pca.r) # projection "finale"
+
