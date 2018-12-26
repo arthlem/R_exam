@@ -20,14 +20,14 @@ tail(supermarkets)
 
 #View all the data
 #View(supermarkets)
-View(supermarkets[c(20,26,32,38,44)])
-#Create Distances sub-DataSet
 
+#Create Distances sub-DataSet
 #11 is not included
 distances <- supermarkets[c(8,9,10)]
 #Create Prices sub-DataSet
 prices <- supermarkets[c(5,6)]
 
+#Create Purchases sub-DataSet, column 12, 13 and 14 not included because these are shop ID's
 purchases <- supermarkets[c(2,3,4)]
 
 boxplot(distances, main= "Distances", horizontal = TRUE, outline = FALSE,las=2)
@@ -94,3 +94,94 @@ summary(Shop_5)
 #Overview of products bougth
 boxplot(supermarkets[,c(2)], main="Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
 boxplot(supermarkets[,c(3)], main="Unique Products Purchased", horizontal = TRUE, outline = FALSE, las=2)
+
+#-----Purchases-----
+#Médiane sur le nombre total de produit acheté et sur le nombre de magasin fréquenté
+med_prod_purchase <- median(supermarkets[,c(2)])
+med_prod_purchase
+
+med_shop_used <- median(supermarkets[,c(7)])
+med_shop_used
+
+#Moyenne sur le nombre magasin fréquenté et le montant des achats
+avg_amount_purchase <- mean(supermarkets[,c(4)])
+avg_amount_purchase
+
+avg_shop_used <- mean(supermarkets[,c(7)])
+avg_shop_used
+
+#Dérivation standard sur le montant des achats
+sd_amount_purchase <- sd(supermarkets[,c(4)])
+sd_amount_purchase
+
+#Variation sur les produits uniques
+var_unique_product <- var(supermarkets[,c(3)])
+var_unique_product
+
+#-----Distance-----
+#Moyenne sur les distance jusqu'au shop
+avg_dist_to_shop <- mean(supermarkets[,c(8)])
+avg_dist_to_shop
+
+avg_dist_max_to_shop <- mean(supermarkets[,c(10)])
+avg_dist_max_to_shop
+
+avg_dist_min_to_shop <- mean(supermarkets[,c(9)])
+avg_dist_min_to_shop
+
+#Moyenne des distances par shop
+avg_dist_shop1 <- mean(supermarkets[,c(15)])
+avg_dist_shop1
+
+avg_dist_shop2 <- mean(supermarkets[,c(21)])
+avg_dist_shop2
+
+avg_dist_shop3 <- mean(supermarkets[,c(27)])
+avg_dist_shop3
+
+avg_dist_shop4 <- mean(supermarkets[,c(33)])
+avg_dist_shop4
+
+avg_dist_shop5 <- mean(supermarkets[,c(39)])
+avg_dist_shop5
+
+#Distance maximal par shop
+max_dist_shop1 <- max(supermarkets[,c(15)])
+max_dist_shop1
+
+max_dist_shop2 <- max(supermarkets[,c(21)])
+max_dist_shop2
+
+max_dist_shop3 <- max(supermarkets[,c(27)])
+max_dist_shop3
+
+max_dist_shop4 <- max(supermarkets[,c(33)])
+max_dist_shop4
+
+max_dist_shop5 <- max(supermarkets[,c(39)])
+max_dist_shop5
+
+#-----Price-----
+#Moyenne des prix des achats
+avg_price_purchase <- mean(supermarkets[,c(5)])
+avg_price_purchase
+
+#Moyenne des prix
+avg_price_product <- mean(supermarkets[,c(6)])
+avg_price_product
+
+#Moyenne des prix par shop
+avg_price_shop1 <- mean(supermarkets[,c(20)])
+avg_price_shop1
+
+avg_price_shop2 <- mean(supermarkets[,c(26)])
+avg_price_shop2
+
+avg_price_shop3 <- mean(supermarkets[,c(32)])
+avg_price_shop3
+
+avg_price_shop4 <- mean(supermarkets[,c(38)])
+avg_price_shop4
+
+avg_price_shop5 <- mean(supermarkets[,c(44)])
+avg_price_shop5
