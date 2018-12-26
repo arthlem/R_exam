@@ -20,14 +20,14 @@ tail(supermarkets)
 
 #View all the data
 #View(supermarkets)
-
+View(supermarkets[c(20,26,32,38,44)])
 #Create Distances sub-DataSet
+
 #11 is not included
 distances <- supermarkets[c(8,9,10)]
 #Create Prices sub-DataSet
 prices <- supermarkets[c(5,6)]
 
-#Create Purchases sub-DataSet, column 12, 13 and 14 not included because these are shop ID's
 purchases <- supermarkets[c(2,3,4)]
 
 boxplot(distances, main= "Distances", horizontal = TRUE, outline = FALSE,las=2)
