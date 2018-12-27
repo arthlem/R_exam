@@ -10,38 +10,44 @@
 #-------------------------------------------SUPERMARKETS-------------------------------------------------
 
 #IMPORT THE DATA
-onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
-View(onlineretail)
-OnlineretailClean <- onlineretail[c(2:6,8)]
-View(OnlineretailClean)
+Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
+View(Onlineretail)
+OnlineretailClean <- Onlineretail[c(3:6,8)]
+#View(OnlineretailClean)
 
 #INSPECT THE DATA
-str(onlineretail)
-dim(supermarkets)
+str(OnlineretailClean)
+dim(OnlineretailClean)
 #Check the first part of the data
-head(supermarkets)
+head(OnlineretailClean)
 #Check the last part of the data
-tail(supermarkets)
+tail(OnlineretailClean)
 
-#Arrange the data
-price <- supermarkets[ , 5:6]
-pairs(price, pch=19)
+#ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS
+#1. Number of invoices (orders)
 
-test <- supermarkets[,c(15,18,21,24)]
-pairs(test, pch=19)
+#2. Number of products
 
-test2 <- supermarkets[,c(4,6,8)]
-pairs(test2, pch=19)
+#3. Number of Countries
 
-#View all the data
-View(supermarkets)
-View(supermarkets[c(20,26,32,38,44)])
-#Create Distances sub-DataSet
+#4. Number of Customers
 
-#11 is not included
-distances <- supermarkets[c(8,9,10)]
-#Create Prices sub-DataSet
-prices <- supermarkets[c(5,6)]
+#5. Amount of purchases for each customer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 purchases <- supermarkets[c(2,3,4)]
 View(purchases)
