@@ -39,6 +39,7 @@ length(ListOfCustomers[!duplicated(ListOfCustomers), ])
 
 #5. Amount of purchases for each country
 PurchasesPerCountry <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$Country), FUN=sum)
+View(PurchasesPerCountry)
 PurchasesNotUk <- PurchasesPerCountry[-36,]
 
 #PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
@@ -53,6 +54,14 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
 
 
 
+
+#Countries with the most returns
+Returns <- subset(Onlineretail,Quantity<0)
+CountriesWithReturns <- aggregate(Returns$Quantity, by=list(Category=Returns$Country), FUN=sum)
+View(CountriesWithReturns)
+
+#Analysis of the % of quantity returned in comparison with the number ordered
+((-CountriesWithReturns[29,2]) / PurchasesPerCountry[36,2])*100
 
 boxplot(Onlineretail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
 
