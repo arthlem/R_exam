@@ -37,9 +37,20 @@ length(ListOfCountry[!duplicated(ListOfCountry), ])
 ListOfCustomers <- Onlineretail["CustomerID"]
 length(ListOfCustomers[!duplicated(ListOfCustomers), ])
 
-#5. Amount of purchases for each customer
+#5. Amount of purchases for each country
 PurchasesPerCountry <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$Country), FUN=sum)
-View(PurchasesPerCountry)
+PurchasesNotUk <- PurchasesPerCountry[-36,]
+
+#PieChart with all countries: TO DO -> Calc the % of sales from UK
+slices <- PurchasesPerCountry[[2]]
+lbls <- PurchasesPerCountry[[1]]
+pie(slices, labels = lbls, main="Pie Chart of Countries without UK")
+
+#Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries
+slicesNotUK <- PurchasesNotUk[[2]]
+lblsNotUK <- PurchasesNotUk[[1]]
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
+
 
 #List of countries
 
