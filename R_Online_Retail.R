@@ -13,6 +13,12 @@
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
 View(Onlineretail)
 
+#Cleaning Dataset
+Onlineretail <- subset(Onlineretail, CustomerID != "")
+#Remove Invoices beggining with C
+Onlineretail <- subset(Onlineretail, grepl("^(?!C).*$", Onlineretail$InvoiceNo, perl = TRUE))
+#Remove POST (postage)
+Onlineretail <- subset(Onlineretail, StockCode != "POST")
 
 #INSPECT THE DATA
 str(Onlineretail)
