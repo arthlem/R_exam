@@ -11,7 +11,7 @@
 
 #IMPORT THE DATA
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
-#View(Onlineretail)
+View(Onlineretail)
 
 
 #INSPECT THE DATA
@@ -59,6 +59,8 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
 Returns <- subset(Onlineretail,Quantity<0)
 CountriesWithReturns <- aggregate(Returns$Quantity, by=list(Category=Returns$Country), FUN=sum)
 View(CountriesWithReturns)
+
+#TO DO: Show the most returned product (!!)
 
 #Analysis of the % of quantity returned in comparison with the number ordered
 ((-CountriesWithReturns[29,2]) / PurchasesPerCountry[36,2])*100
