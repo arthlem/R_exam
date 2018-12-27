@@ -11,30 +11,33 @@
 
 #IMPORT THE DATA
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
-View(Onlineretail)
-OnlineretailClean <- Onlineretail[c(3:6,8)]
-#View(OnlineretailClean)
+#View(Onlineretail)
+
 
 #INSPECT THE DATA
-str(OnlineretailClean)
-dim(OnlineretailClean)
+str(Onlineretail)
+dim(Onlineretail)
 #Check the first part of the data
-head(OnlineretailClean)
+head(Onlineretail)
 #Check the last part of the data
-tail(OnlineretailClean)
+tail(Onlineretail)
 
 #ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS
+
 #1. Number of invoices (orders)
-UniqueInvoices <-
+ListOfInvoices <- Onlineretail["InvoiceNo"]
+length(ListOfInvoices[!duplicated(ListOfInvoices), ])
 #2. Number of products
-UniqueProducts <-
+ListOfProducts <- Onlineretail["StockCode"]
+length(ListOfProducts[!duplicated(ListOfProducts), ])
 #3. Number of Countries
-UniqueCountries <-
+ListOfCountry <- Onlineretail["Country"]
+length(ListOfCountry[!duplicated(ListOfCountry), ])
 #4. Number of Customers
-UniqueCustomers <-
+ListOfCustomers <- Onlineretail["CustomerID"]
+length(ListOfCustomers[!duplicated(ListOfCustomers), ])
+
 #5. Amount of purchases for each customer
-AmountPurchases <-
+
 
 #List of countries
-ListOfCountry <- OnlineretailClean["Country"]
-ListOfCountry[!duplicated(ListOfCountry), ]
