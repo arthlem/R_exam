@@ -38,7 +38,8 @@ ListOfCustomers <- Onlineretail["CustomerID"]
 length(ListOfCustomers[!duplicated(ListOfCustomers), ])
 
 #5. Amount of purchases for each customer
-
+PurchasesPerCountry <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$Country), FUN=sum)
+View(PurchasesPerCountry)
 
 #List of countries
 
