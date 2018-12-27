@@ -25,15 +25,15 @@ tail(OnlineretailClean)
 
 #ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS
 #1. Number of invoices (orders)
-
+UniqueInvoices <-
 #2. Number of products
-
+UniqueProducts <-
 #3. Number of Countries
-
+UniqueCountries <-
 #4. Number of Customers
-
+UniqueCustomers <-
 #5. Amount of purchases for each customer
-
+AmountPurchases <-
 
 
 
