@@ -60,10 +60,15 @@ Returns <- subset(Onlineretail,Quantity<0)
 CountriesWithReturns <- aggregate(Returns$Quantity, by=list(Category=Returns$Country), FUN=sum)
 View(CountriesWithReturns)
 
+#Sales per product
+SalesPerProduct <- aggregate(Onlineretail$Quantity, by=list(StockCode=Onlineretail$StockCode), FUN=sum)
+View(SalesPerProduct)
+boxplot(SalesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
 #TO DO: Show the most returned product (!!)
 
 #Analysis of the % of quantity returned in comparison with the number ordered
 ((-CountriesWithReturns[29,2]) / PurchasesPerCountry[36,2])*100
 
 boxplot(Onlineretail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+
 
