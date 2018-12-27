@@ -10,16 +10,29 @@
 #-------------------------------------------SUPERMARKETS-------------------------------------------------
 
 #IMPORT THE DATA
-supermarkets <- read.csv2(file.choose(), header=TRUE, sep=",", dec=".") #Load CSV File
+onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
+View(onlineretail)
 
 #INSPECT THE DATA
+str(supermarkets)
+dim(supermarkets)
 #Check the first part of the data
 head(supermarkets)
 #Check the last part of the data
 tail(supermarkets)
 
+#Arrange the data
+price <- supermarkets[ , 5:6]
+pairs(price, pch=19)
+
+test <- supermarkets[,c(15,18,21,24)]
+pairs(test, pch=19)
+
+test2 <- supermarkets[,c(4,6,8)]
+pairs(test2, pch=19)
+
 #View all the data
-#View(supermarkets)
+View(supermarkets)
 View(supermarkets[c(20,26,32,38,44)])
 #Create Distances sub-DataSet
 
@@ -32,14 +45,21 @@ purchases <- supermarkets[c(2,3,4)]
 View(purchases)
 clients_of_the_shop_3 <- supermarkets[ which(supermarkets$amount_purchases_shop_3 > 0), ]
 
-boxplot(distances, main= "Distances", horizontal = TRUE, outline = FALSE,las=2)
 par(mar=c(5,10,4,2))
+
+boxplot(distances, main= "Distances", horizontal = TRUE, outline = FALSE,las=2)
+
 boxplot(prices, main= "Prices", horizontal = TRUE, outline = FALSE,las=2)
+
+par(mar=c(5,12,4,2))
 boxplot(purchases, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+
+#Inspect the data of purchases
 head(purchases)
 tail(purchases)
 summary(purchases)
 View(purchases)
+
 #View the different column names of the data and their column number
 names(supermarkets)
 
@@ -115,8 +135,8 @@ measures.CR<-scale(measures, center = TRUE, scale = TRUE)
 View(measures.CR)
 
 install.packages("rgl") 
-# Chargement de package dans le syst?me:
-library(rgl)
+# Chargement de package dans le systeme:
+#library(rgl)
 
 Covar<-cov(measures.CR)
 
