@@ -41,3 +41,7 @@ length(ListOfCustomers[!duplicated(ListOfCustomers), ])
 
 
 #List of countries
+
+
+boxplot(Onlineretail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+
