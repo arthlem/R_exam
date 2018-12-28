@@ -263,7 +263,7 @@ names(countryPerStockCode) <- c("Country","NbOfProduct")
 
 #Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
 countryPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$Country), FUN=sum)
-names(countryPerPurchases) <- c("Country","Purchases")
+names(countryPerPurchases) <- c("Country","Turnover")
 
 #Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
 countryPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$Country), FUN=length)
@@ -283,4 +283,5 @@ pca <- princomp(productData.CR)
 summary(pca)
 plot(pca)
 loadings(pca)
+pairs(productData)
 
