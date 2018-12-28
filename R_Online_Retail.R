@@ -19,10 +19,12 @@ library(ggplot2)
 library(data.table)
 library(lubridate)
 #General constants
-turnoverByMonthScale <- 1/1000000
+turnoverByMonthScale <- 1/1000
 
 #----A. IMPORT THE DATA----
-Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
+?read.csv2
+
+Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL) #Load CSV File
 
 #Check if the data has been imported correctly
 #View(Onlineretail)
@@ -106,7 +108,10 @@ OnlineretailUnique <- unique(OnlineretailClean)
 dim(OnlineretailClean)-dim(OnlineretailUnique)
 
 #Compute total revenue per row
-setDT(OnlineretailClean)[, TotalPrice := as.numeric(OnlineretailClean$UnitPrice)*OnlineretailClean$Quantity]
+#setDT(OnlineretailClean)[, TotalPrice := as.numeric(as.character(UnitPrice))*Quantity]
+
+OnlineretailClean <- OnlineretailClean %>% 
+  mutate(TotalPrice = Quantity*UnitPrice)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
@@ -211,5 +216,9 @@ SalesData <- OnlineretailClean %>%
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+<<<<<<< HEAD
   labs(x="Month", y="Turnover in million")
 
+=======
+  labs(x="Month", y="Turnover in thousand")
+>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
