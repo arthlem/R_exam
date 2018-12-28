@@ -252,5 +252,13 @@ count(OnlineretailUnique, 'StockCode')
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
-
+productData <- productData[2:4]
+View(productData)
 #Create 
+
+productData.CR<-scale(productData,center=TRUE,scale=TRUE)
+pca <- princomp(productData.CR)
+summary(pca)
+plot(pca)
+loadings(pca)
+
