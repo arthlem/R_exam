@@ -22,7 +22,7 @@ library(lubridate)
 turnoverByMonthScale <- 1/1000
 
 #----A. IMPORT THE DATA----
-Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL) #Load CSV File
+Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL, fileEncoding = "UTF-8-BOM") #Load CSV File
 
 #Check if the data has been imported correctly
 #View(Onlineretail)
