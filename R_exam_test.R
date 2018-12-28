@@ -270,10 +270,10 @@ countryPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
 #Merge the dataset to make countryData
-CountryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
-CountryData <- merge(CountryData, countryPerCustomers, by="Country")
+countryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
+countryData <- merge(countryData, countryPerCustomers, by="Country")
 row.names(CountryData) <- CountryData$Country
-CountryData <- CountryData[2:4]
+countryData <- countryData[2:4]
 
 View(CountryData)
 
@@ -284,3 +284,8 @@ summary(pca)
 plot(pca)
 loadings(pca)
 
+countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
+pca2 <- princomp(countryData.CR)
+summary(pca2)
+plot(pca2)
+loadings(pca2)
