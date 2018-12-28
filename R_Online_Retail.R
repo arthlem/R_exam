@@ -9,11 +9,49 @@
 
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 
+install.packages("dplyr")
+install.packages("tidyverse")
+library(dplyr)
+library(tidyverse)
+
 #----A. IMPORT THE DATA----
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
 
 #Check if the data has been imported correctly
 #View(Onlineretail)
+
+#Explore the varibales
+#How many variables do we have?
+length(Onlineretail)
+
+#What are the different variables?
+str(Onlineretail)
+
+#Number of unique InvoiceNo (orders)
+length(unique(Onlineretail$InvoiceNo))
+
+#Number of unique StockCode (different products)
+length(unique(Onlineretail$StockCode))
+
+#Number of unique Description (different products): Compare with the length of StockCode
+length(unique(Onlineretail$Description))
+
+#Analysis of Quantity
+summary(Onlineretail$Quantity)
+
+#InvoiceData -> Select function has been taken from the library dplyr
+#Check when the records started and when it ended
+head(select(Onlineretail, InvoiceDate), 10)
+tail(select(Onlineretail, InvoiceDate), 10)
+
+#UnitPrice, not working?
+#summary(Onlineretail$UnitPrice)
+
+#CustomerID, show th enumber of unique Customers
+length(unique(Onlineretail$CustomerID))
+
+#Country, show the number of unique countries
+length(unique(Onlineretail$Country))
 
 #----B. DATA CLEANING----
 #Removing the missing variables (CustomerID that are empty)
@@ -21,20 +59,18 @@ OnlineretailClean <- subset(Onlineretail, CustomerID != "")
 
 #Counting the number of removed variables (missing CustomerID)
 dim(Onlineretail)-dim(OnlineretailClean)
+#Percentage of empty data
+round((135080/541909)*100,digit=2)
 
 #Remove Invoices beggining with C
-OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", Onlineretail$InvoiceNo, perl = TRUE))
+OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
 
 #Remove POST (postage)
 OnlineretailClean <- subset(OnlineretailClean, StockCode != "POST")
 
-#----C. INSPECT THE DATA----
-str(Onlineretail)
-dim(Onlineretail)
-#Check the first part of the data
-head(Onlineretail)
-#Check the last part of the data
-tail(Onlineretail)
+#Remove Duplicates
+OnlineretailUnique <- unique(OnlineretailClean)
+dim(OnlineretailClean)-dim(OnlineretailUnique)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
