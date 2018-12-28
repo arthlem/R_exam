@@ -252,7 +252,9 @@ count(OnlineretailUnique, 'StockCode')
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
+row.names(productData) <- productData$StockCode
 productData <- productData[2:4]
+
 View(productData)
 #Create 
 
