@@ -16,7 +16,7 @@ install.packages("ggplot2")
 #Libraries to load
 library(dplyr)
 library(ggplot2)
-
+library(data.table)
 #----A. IMPORT THE DATA----
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
 
@@ -58,6 +58,9 @@ OnlineretailClean <- subset(OnlineretailClean, StockCode != "PADS")
 
 #Remove DOTCOM POSTAGE
 OnlineretailClean <- subset(OnlineretailClean, StockCode != "DOT")
+
+#Compute total revenur per row
+setDT(OnlineretailClean)[, TotalPrice := as.numeric(OnlineretailClean$UnitPrice)*OnlineretailClean$Quantity]
 
 #----C. INSPECT THE DATA----
 str(Onlineretail)
@@ -140,7 +143,6 @@ monthData <- OnlineretailClean %>%
 ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day               
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
-  theme_minimal()+
   labs(x="Month", y="Number of invoices")
 
 #Number of invoices per day in 2011
@@ -157,10 +159,23 @@ ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day
 #Number of invoices per hour in 2011
 #Filter to select year 2011 and count invoices for each hour of the day
 hourData <- OnlineretailClean %>% 
-  filter(InvoiceYear==2011) %>% 
+  dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceHour)
 
 ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day               
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
   labs(x="hour", y="Number of invoices")
+
+#Turnover per month in 2011
+SalesData <- OnlineretailClean %>%
+  dplyr::filter(InvoiceYear == 2011) %>%
+  group_by(InvoiceMonth) %>%
+  summarise(CA = sum(TotalPrice))
+
+View(SalesData)
+scale <- 1/1000000
+ggplot(SalesData, aes(InvoiceMonth, CA*scale)) +              
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=format(round(CA*scale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+  labs(x="Month", y="Turnover in million")
