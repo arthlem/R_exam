@@ -235,7 +235,7 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
 #----A. ARANGE DATA SET----
 #length(unique(OnlineretailUnique$StockCode))
 
-#Create a dataset per product (StockCode / sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
+#Create a dataset per product (StockCode // sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
 #Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
 stockPerQuantity <- aggregate(OnlineretailUnique$Quantity, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
 names(stockPerQuantity) <- c("StockCode","Quantity")
@@ -246,8 +246,7 @@ names(stockPerPurchases) <- c("StockCode","Purchases")
 
 #Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
 stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
-names(stockPerCustomers) <- c("StockCode","Customers")
-count(OnlineretailUnique, 'StockCode')
+names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
@@ -256,8 +255,29 @@ row.names(productData) <- productData$StockCode
 productData <- productData[2:4]
 
 View(productData)
-#Create 
 
+#Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
+#Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
+countryPerStockCode <- aggregate(OnlineretailUnique$StockCode, by=list(Category=OnlineretailUnique$Country), FUN=length)
+names(countryPerStockCode) <- c("Country","NbOfProduct")
+
+#Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
+countryPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$Country), FUN=sum)
+names(countryPerPurchases) <- c("Country","Purchases")
+
+#Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
+countryPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$Country), FUN=length)
+names(countryPerCustomers) <- c("Country","NbOfCustomers")
+
+#Merge the dataset to make countryData
+CountryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
+CountryData <- merge(CountryData, countryPerCustomers, by="Country")
+row.names(CountryData) <- CountryData$Country
+CountryData <- CountryData[2:4]
+
+View(CountryData)
+
+#----B. GET INTO PCA----
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
 pca <- princomp(productData.CR)
 summary(pca)
