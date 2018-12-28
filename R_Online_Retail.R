@@ -22,12 +22,12 @@ library(lubridate)
 turnoverByMonthScale <- 1/1000
 
 #----A. IMPORT THE DATA----
-Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL) #Load CSV File
+Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL, fileEncoding = "UTF-8-BOM") #Load CSV File
 
 #Check if the data has been imported correctly
 #View(Onlineretail)
 
-#Match canceled orders its orders
+#Match canceled orders and  corresponding orders
 ProductsPerInvoice <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$InvoiceNo), FUN=sum)
 
 #Explore the varibales
@@ -73,7 +73,11 @@ dim(Onlineretail)-dim(OnlineretailClean)
 round((135080/541909)*100,digit=2)
 
 #Remove Invoices beggining with C
+beforeCancelations <- dim(OnlineretailClean[])
 OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
+afterCancelations <- dim(OnlineretailClean)
+#Percentage of Cancelations (to finish)
+(beforeCancelations-withCancelations)
 
 #Finish cleaning dataset in one line 
 # DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
@@ -100,6 +104,12 @@ OnlineretailClean <- subset(OnlineretailClean, StockCode != "PADS")
 
 #Remove DOTCOM POSTAGE
 OnlineretailClean <- subset(OnlineretailClean, StockCode != "DOT")
+
+#Remove Unit Price <= 0
+OnlineretailClean <- subset(OnlineretailClean, UnitPrice > 0)
+
+#Remove Quantity < 0
+OnlineretailClean <- subset(OnlineretailClean, Quantity > 0)
 
 #Remove Duplicates
 OnlineretailUnique <- unique(OnlineretailClean)
@@ -213,5 +223,18 @@ SalesData <- OnlineretailClean %>%
 
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
-  labs(x="Month", y="Turnover in thousand")
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
+#<<<<<<< HEAD
+# labs(x="Month", y="Turnover in million")
+#
+#=======
+#  labs(x="Month", y="Turnover in thousand")
+#>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
+
+#-------------------------------------------PCA-------------------------------------------
+
+
+
+
+
+  

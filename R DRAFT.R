@@ -17,14 +17,27 @@ library(tidyverse)
 #----A. IMPORT THE DATA----
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
 
+#Remove duplicates
 OnlineretailUnique <- unique(Onlineretail)
 
-ProductsPerInvoice <- aggregate(OnlineretailUnique$Quantity, by=list(InvoiceNo=OnlineretailUnique$InvoiceNo), FUN=sum)
+#Sum the quantities of each order (canceled included)
+ProductsPerInvoice <- aggregate(OnlineretailUnique$Quantity, by=list(InvoiceNo=OnlineretailUnique$InvoiceNo,StockCode=OnlineretailUnique$StockCode, CustomerID=OnlineretailUnique$CustomerID), FUN=sum)
+
+#Create a new column indicating when an order has been canceled
 ProductsPerInvoice$Order_Canceled <- ifelse(grepl("C",ProductsPerInvoice$InvoiceNo), "1", "0")
 View(ProductsPerInvoice)
 
 
+#Sum the quantities of each customer to remove the canceled orders
+ProductsPerCustomer <- aggregate(ProductsPerInvoice$x, by=list(CustomerID=ProductsPerInvoice$CustomerID), FUN=sum)
+View(ProductsPerCustomer)
 
+#Remove negative quantities
+ProductsPerCustomerNotNeg <- subset(ProductsPerCustomer, x >= 0)
+View(ProductsPerCustomerNotNeg)
+
+#Clean dataset without canceled orders and negative quantities
+summary(ProductsPerCustomerNotNeg)
 
 
 
