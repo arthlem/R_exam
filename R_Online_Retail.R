@@ -223,7 +223,7 @@ SalesData <- OnlineretailClean %>%
 
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
 #<<<<<<< HEAD
 # labs(x="Month", y="Turnover in million")
 #
@@ -231,8 +231,9 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
 #  labs(x="Month", y="Turnover in thousand")
 #>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
 
-#----PCA----
-ggplot()
+#-------------------------------------------PCA-------------------------------------------
+
+
 
 
 
