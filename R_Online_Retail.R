@@ -20,6 +20,9 @@ Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.name
 #Check if the data has been imported correctly
 #View(Onlineretail)
 
+#Match canceled orders its orders
+ProductsPerInvoice <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$InvoiceNo), FUN=sum)
+
 #Explore the varibales
 #How many variables do we have?
 length(Onlineretail)
