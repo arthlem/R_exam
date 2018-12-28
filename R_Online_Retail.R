@@ -27,7 +27,7 @@ Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.name
 #Check if the data has been imported correctly
 #View(Onlineretail)
 
-#Match canceled orders its orders
+#Match canceled orders and  corresponding orders
 ProductsPerInvoice <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$InvoiceNo), FUN=sum)
 
 #Explore the varibales
@@ -212,3 +212,4 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
   labs(x="Month", y="Turnover in million")
+
