@@ -10,7 +10,9 @@
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 
 install.packages("dplyr")
+install.packages("tidyverse")
 library(dplyr)
+library(tidyverse)
 
 #----A. IMPORT THE DATA----
 Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=".", row.names = NULL) #Load CSV File
@@ -66,6 +68,9 @@ OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailCl
 #Remove POST (postage)
 OnlineretailClean <- subset(OnlineretailClean, StockCode != "POST")
 
+#Remove Duplicates
+OnlineretailUnique <- unique(OnlineretailClean)
+dim(OnlineretailClean)-dim(OnlineretailUnique)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
