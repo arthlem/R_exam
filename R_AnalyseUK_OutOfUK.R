@@ -258,6 +258,7 @@ productData <- productData[2:5]
 
 View(productData)
 
+#----------COUNTRY-----------
 #Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
 #Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
 countryPerStockCode <- aggregate(OnlineretailUnique$StockCode, by=list(Category=OnlineretailUnique$Country), FUN=length)
@@ -279,6 +280,8 @@ countryData <- countryData[2:4]
 
 View(countryData)
 
+
+
 #----B. GET INTO PCA----
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
 pca <- princomp(productData.CR)
@@ -286,6 +289,10 @@ summary(pca)
 plot(pca)
 loadings(pca)
 pairs(productData)
+
+#--------------------------------UPDATE 29/12/2018------------------------------------
+
+#---------ALL COUNTRIES-------------
 
 countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
 pca2 <- princomp(countryData.CR)
@@ -295,16 +302,43 @@ loadings(pca2)
 pairs(countryData)
 View(countryData)
 
+
+#---------WITHOUT UK----------------
+
 #Same without UK
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
+
 countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
 pca3 <- princomp(countryDataWithoutUK.CR)
 summary(pca3)
 plot(pca3)
 loadings(pca3)
-pairs(countryDataWithoutUK)
+pairs(countryDataWithoutUK, pch=19)
 View(countryDataWithoutUK)
 
+
+#---------WITHOUT UK BUT ONLY BEST SELLING COUNTRIES-----------
+
+#Order by highest turnover, BS stands for Best Selling
+countryDataWithoutUKBS <- countryDataWithoutUK[order(-countryDataWithoutUK$Turnover),]
+#Take the best 17 selling countries
+countryDataWithoutUKBS <- countryDataWithoutUKBS[1:17,]
+
+countryDataWithoutUKBS.CR<-scale(countryDataWithoutUKBS,center=TRUE,scale=TRUE)
+pca3 <- princomp(countryDataWithoutUKBS.CR)
+summary(pca3)
+plot(pca3)
+loadings(pca3)
+pairs(countryDataWithoutUKBS, pch=19)
+View(countryDataWithoutUKBS)
+
+#Let's compare
+
+pairs(countryData, main="All Countries", pch=19)
+pairs(countryDataWithoutUK,main="All Countries Without UK", pch=19)
+pairs(countryDataWithoutUKBS,main="TOP 17 Without UK", pch=19)
+
+#------------END OF UPDATE------------
 
 #Using ade4
 
@@ -370,3 +404,4 @@ scatter(acp.ade4, posieig="none")
 # Idem mais sans ?tiquettes, les individus ?tant repr?sent? par des points
 scatter(acp.ade4, posieig="none", clab.row=0)
 # Comparez cette visualisation avec la visualisation 3D du debut...
+

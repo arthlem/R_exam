@@ -285,6 +285,10 @@ plot(pca)
 loadings(pca)
 pairs(productData)
 
+#--------------------------------UPDATE 29/12/2018------------------------------------
+
+#---------ALL COUNTRIES-------------
+
 countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
 pca2 <- princomp(countryData.CR)
 summary(pca2)
@@ -293,16 +297,43 @@ loadings(pca2)
 pairs(countryData)
 View(countryData)
 
+
+#---------WITHOUT UK----------------
+
 #Same without UK
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
+
 countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
 pca3 <- princomp(countryDataWithoutUK.CR)
 summary(pca3)
 plot(pca3)
 loadings(pca3)
-pairs(countryDataWithoutUK)
+pairs(countryDataWithoutUK, pch=19)
 View(countryDataWithoutUK)
 
+
+#---------WITHOUT UK BUT ONLY BEST SELLING COUNTRIES-----------
+
+#Order by highest turnover, BS stands for Best Selling
+countryDataWithoutUKBS <- countryDataWithoutUK[order(-countryDataWithoutUK$Turnover),]
+#Take the best 17 selling countries
+countryDataWithoutUKBS <- countryDataWithoutUKBS[1:17,]
+
+countryDataWithoutUKBS.CR<-scale(countryDataWithoutUKBS,center=TRUE,scale=TRUE)
+pca3 <- princomp(countryDataWithoutUKBS.CR)
+summary(pca3)
+plot(pca3)
+loadings(pca3)
+pairs(countryDataWithoutUKBS, pch=19)
+View(countryDataWithoutUKBS)
+
+#Let's compare
+
+pairs(countryData, main="All Countries", pch=19)
+pairs(countryDataWithoutUK,main="All Countries Without UK", pch=19)
+pairs(countryDataWithoutUKBS,main="TOP 17 Without UK", pch=19)
+
+#------------END OF UPDATE 29/12/2018------------
 
 #Using ade4
 
