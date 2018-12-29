@@ -232,7 +232,142 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
 #>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
 
 #-------------------------------------------PCA-------------------------------------------
+#----A. ARANGE DATA SET----
+#length(unique(OnlineretailUnique$StockCode))
 
+#Create a dataset per product (StockCode // sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
+#Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
+stockPerQuantity <- aggregate(OnlineretailUnique$Quantity, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
+names(stockPerQuantity) <- c("StockCode","Quantity")
+
+#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
+stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
+names(stockPerPurchases) <- c("StockCode","Purchases")
+
+#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
+stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
+names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
+
+#Merge the dataset to make productData
+productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
+productData <- merge(productData, stockPerCustomers, by="StockCode")
+row.names(productData) <- productData$StockCode
+productData <- productData[2:4]
+
+View(productData)
+
+#Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
+#Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
+countryPerStockCode <- aggregate(OnlineretailUnique$StockCode, by=list(Category=OnlineretailUnique$Country), FUN=length)
+names(countryPerStockCode) <- c("Country","NbOfProduct")
+
+#Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
+countryPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$Country), FUN=sum)
+names(countryPerPurchases) <- c("Country","Turnover")
+
+#Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
+countryPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$Country), FUN=length)
+names(countryPerCustomers) <- c("Country","NbOfCustomers")
+
+#Merge the dataset to make countryData
+countryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
+countryData <- merge(countryData, countryPerCustomers, by="Country")
+row.names(countryData) <- countryData$Country
+countryData <- countryData[2:4]
+
+View(countryData)
+
+#----B. GET INTO PCA----
+productData.CR<-scale(productData,center=TRUE,scale=TRUE)
+pca <- princomp(productData.CR)
+summary(pca)
+plot(pca)
+loadings(pca)
+pairs(productData)
+
+countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
+pca2 <- princomp(countryData.CR)
+summary(pca2)
+plot(pca2)
+loadings(pca2)
+pairs(countryData)
+View(countryData)
+
+#Same without UK
+countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
+countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
+pca3 <- princomp(countryDataWithoutUK.CR)
+summary(pca3)
+plot(pca3)
+loadings(pca3)
+pairs(countryDataWithoutUK)
+View(countryDataWithoutUK)
+
+
+#Using ade4
+
+acp.ade4<-dudi.pca(productData, scannf=FALSE, nf=3,center = TRUE, scale = TRUE )
+
+# Dans les deux cas il est conseill? de centrer(center=TRUE)-r?duire(scale=TURE)
+# les donn?es :
+# - si on ne centre pas, la premi?re composante sera la direction qui va 
+#   de l'origine (point o? toutes les variables originales sont nulles)au 
+#   centre du nuage.
+# - la r?duction permet d'?viter les effets des diff?rences importantes d'?chelles 
+#   entre les variables.
+
+# Impression des valeurs propres
+acp.ade4$eig
+# Les variances cumul?es
+cumsum(acp.ade4$eig)
+# Les variances en pourcentages:
+acp.ade4$eig/sum(acp.ade4$eig)*100
+# Le screeplot:
+barplot(acp.ade4$eig/sum(acp.ade4$eig)*100)
+# Les pourcentages cumul?s :
+cumsum(acp.ade4$eig/sum(acp.ade4$eig)*100)
+
+
+# Le probl?me de l'ACP ?tant l'interpr?tation des nouveaux axes (les 
+# composantes) puisqu'ils sont form?s par combinaisons lin?aires
+# des anciennes variables. C?d que les composantes sont un mix
+# des variables initiales.
+# Une premi?re fa?on de "comprendre" ces composantes est de regarder les 
+# vecteurs propres qui contiennent les coefficients des combinaisons 
+# lin?aires ?voqu?es ci-dessus:
+acp.ade4$c1
+
+# On peut aussi avoir une id?e de la d?compostion l'inertie (la part de la variance totale 
+# expliqu?e) entre les variables et composantes (en 10000 ?mes):
+inertia.dudi(acp.ade4,col.inertia = T)$col.abs
+
+
+# Le package ade4 fournit aussi d'autres outils.
+# Plot des "droites" de corr?lation des variables avec les deux premi?res 
+# composantes: 
+score(acp.ade4, xax=1)
+score(acp.ade4, xax=2)
+# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
+
+
+
+# On peut tracer les cercles de correlation o? la longueur des fl?ches 
+# indique la part de leur information repr?sent?e par les deux axes. 
+# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
+# - angle aigu = positive;
+# - angle droit = nulle;
+# - angle obtus = n?gative.
+s.corcircle(acp.ade4$co)
+
+# Enfin on peut passer aux projections des donn?es dans les nouveaux axes.
+# Repr?sentation ? la fois les individus et des variables dans le premier plan
+# factoriel (deux premi?res composantes):
+scatter(acp.ade4)
+# Idem sans l'histogramme des valeurs propres
+scatter(acp.ade4, posieig="none")
+# Idem mais sans ?tiquettes, les individus ?tant repr?sent? par des points
+scatter(acp.ade4, posieig="none", clab.row=0)
+# Comparez cette visualisation avec la visualisation 3D du debut...
 
 
 
