@@ -20,6 +20,7 @@ library(dplyr)
 library(ggplot2)
 library(data.table)
 library(lubridate)
+library(ade4)
 #General constants
 turnoverByMonthScale <- 1/1000
 
@@ -290,26 +291,115 @@ countryData <- countryData[2:4]
 View(countryData)
 
 #----B. GET INTO PCA----
+#--------------------PCA FOR PRODUCT----------------
 #Plot of a matrix of data
 pairs(productData)
+
+#Returns the matrix of correlations (purement informatif)
+cor(productData)
 
 #Center and scale data
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
-pca <- princomp(productData.CR)
-summary(pca)
-plot(pca)
-loadings(pca)
+pcaProduct <- princomp(productData.CR)
 
+#Variance-covariance des variables centré et réduite
+covarProduct<-cov(productData.CR)
+#valeurs propres et pourcentage d'info dans les composantes
+summary(pcaProduct)
 
-countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
-pca2 <- princomp(countryData.CR)
-summary(pca2)
-plot(pca2)
-loadings(pca2)
-pairs(countryData)
-View(countryData)
+#visuel du summary
+plot(pcaProduct)
 
+#poids des variables originelles dans les composantes
+loadings(pcaProduct)
+
+#Projections finale
+biplot(pcaProduct)
+
+#Utilisation de la librairie ade4 pour l'acp
+pcaProductAde4<-dudi.pca(productData, scannf=FALSE,center = TRUE, scale = TRUE)
+
+# Impression des valeurs propres
+pcaProductAde4$eig
+# Les variances cumulées
+cumsum(pcaProductAde4$eig)
+# Les variances en pourcentages:
+pcaProductAde4$eig/sum(pcaProductAde4$eig)*100
+# Le screeplot:
+barplot(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
+# Les pourcentages cumulés :
+cumsum(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
+
+#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+inertia.dudi(pcaProductAde4,col.inertia = T)$col.abs
+
+# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
+score(pcaProductAde4, xax=1)
+score(pcaProductAde4, xax=2)
+
+#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
+# L'angle entre deux  flèches représente la corrélation qui les lie : 
+# - angle aigu = positive;
+# - angle droit = nulle;
+# - angle obtus = négative.
+s.corcircle(pcaProductAde4$co)
+
+#--------------------PCA FOR COUNTRY----------------
+#Plot of a matrix of data
+pairs(CountryData)
+
+#Returns the matrix of correlations (purement informatif)
+cor(CountryData)
+
+#Center and scale data
+CountryData.CR<-scale(CountryData,center=TRUE,scale=TRUE)
+#Perform the pca and returns the results as an object
+pcaContry <- princomp(CountryData.CR)
+
+#Variance-covariance des variables centré et réduite
+covarCountry<-cov(CountryData.CR)
+#valeurs propres et pourcentage d'info dans les composantes
+summary(pcaCountry)
+
+#visuel du summary
+plot(pcaCountry)
+
+#poids des variables originelles dans les composantes
+loadings(pcaCountry)
+
+#Projections finale
+biplot(pcaCountry)
+
+#Utilisation de la librairie ade4 pour l'acp
+pcaCountryAde4<-dudi.pca(CountryData, scannf=FALSE,center = TRUE, scale = TRUE)
+
+# Impression des valeurs propres
+pcaCountryAde4$eig
+# Les variances cumulées
+cumsum(pcaCountryAde4$eig)
+# Les variances en pourcentages:
+pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
+# Le screeplot:
+barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+# Les pourcentages cumulés :
+cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+
+#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
+
+# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
+score(pcaCountryAde4, xax=1)
+score(pcaCountryAde4, xax=2)
+
+#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
+# L'angle entre deux  flèches représente la corrélation qui les lie : 
+# - angle aigu = positive;
+# - angle droit = nulle;
+# - angle obtus = négative.
+s.corcircle(pcaCountryAde4$co)
+
+#--------------------PCA FOR COUNTRY WITHOUT UK----------------
 #Same without UK
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
 countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
@@ -320,75 +410,57 @@ loadings(pca3)
 pairs(countryDataWithoutUK)
 View(countryDataWithoutUK)
 
+#Remove UK from the dataset 
+countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
+#Plot of a matrix of data
+pairs(countryDataWithoutUK)
 
-#Using ade4
+#Returns the matrix of correlations (purement informatif)
+cor(countryDataWithoutUK)
 
-acp.ade4<-dudi.pca(productData, scannf=FALSE, nf=3,center = TRUE, scale = TRUE )
+#Center and scale data
+countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
+#Perform the pca and returns the results as an object
+pcaContryWithoutUK <- princomp(countryDataWithoutUK.CR)
 
-# Dans les deux cas il est conseill? de centrer(center=TRUE)-r?duire(scale=TURE)
-# les données :
-# - si on ne centre pas, la premi?re composante sera la direction qui va 
-#   de l'origine (point o? toutes les variables originales sont nulles)au 
-#   centre du nuage.
-# - la r?duction permet d'?viter les effets des diff?rences importantes d'?chelles 
-#   entre les variables.
+#Variance-covariance des variables centré et réduite
+covarCountryWithoutUK<-cov(countryDataWithoutUK.CR)
+#valeurs propres et pourcentage d'info dans les composantes
+summary(pcaCountryWithoutUK)
+
+#visuel du summary
+plot(pcaCountryWithoutUK)
+
+#poids des variables originelles dans les composantes
+loadings(pcaCountryWithoutUK)
+
+#Projections finale
+biplot(pcaCountryWithoutUK)
+
+#Utilisation de la librairie ade4 pour l'acp
+pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TRUE, scale = TRUE)
 
 # Impression des valeurs propres
-acp.ade4$eig
-# Les variances cumul?es
-cumsum(acp.ade4$eig)
+pcaCountryWithoutUK$eig
+# Les variances cumulées
+cumsum(pcaCountryWithoutUK$eig)
 # Les variances en pourcentages:
-acp.ade4$eig/sum(acp.ade4$eig)*100
+pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100
 # Le screeplot:
-barplot(acp.ade4$eig/sum(acp.ade4$eig)*100)
-# Les pourcentages cumul?s :
-cumsum(acp.ade4$eig/sum(acp.ade4$eig)*100)
+barplot(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
+# Les pourcentages cumulés :
+cumsum(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
 
+#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+inertia.dudi(pcaCountryWithoutUK,col.inertia = T)$col.abs
 
-# Le probl?me de l'ACP ?tant l'interpr?tation des nouveaux axes (les 
-# composantes) puisqu'ils sont form?s par combinaisons lin?aires
-# des anciennes variables. C?d que les composantes sont un mix
-# des variables initiales.
-# Une premi?re fa?on de "comprendre" ces composantes est de regarder les 
-# vecteurs propres qui contiennent les coefficients des combinaisons 
-# lin?aires ?voqu?es ci-dessus:
-acp.ade4$c1
-
-# On peut aussi avoir une id?e de la d?compostion l'inertie (la part de la variance totale 
-# expliqu?e) entre les variables et composantes (en 10000 ?mes):
-inertia.dudi(acp.ade4,col.inertia = T)$col.abs
-
-
-# Le package ade4 fournit aussi d'autres outils.
-# Plot des "droites" de corr?lation des variables avec les deux premi?res 
-# composantes: 
-score(acp.ade4, xax=1)
-score(acp.ade4, xax=2)
 # Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
+score(pcaCountryWithoutUK, xax=1)
+score(pcaCountryWithoutUK, xax=2)
 
-
-
-# On peut tracer les cercles de correlation o? la longueur des fl?ches 
-# indique la part de leur information repr?sent?e par les deux axes. 
-# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
+#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
+# L'angle entre deux  flèches représente la corrélation qui les lie : 
 # - angle aigu = positive;
 # - angle droit = nulle;
-# - angle obtus = n?gative.
-s.corcircle(acp.ade4$co)
-
-# Enfin on peut passer aux projections des donn?es dans les nouveaux axes.
-# Repr?sentation ? la fois les individus et des variables dans le premier plan
-# factoriel (deux premi?res composantes):
-scatter(acp.ade4)
-# Idem sans l'histogramme des valeurs propres
-scatter(acp.ade4, posieig="none")
-# Idem mais sans ?tiquettes, les individus ?tant repr?sent? par des points
-scatter(acp.ade4, posieig="none", clab.row=0)
-# Comparez cette visualisation avec la visualisation 3D du debut...
-
-
-
-
-
-
-
+# - angle obtus = négative.
+s.corcircle(pcaCountryWithoutUK$co)
