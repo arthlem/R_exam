@@ -244,15 +244,25 @@ names(stockPerQuantity) <- c("StockCode","Quantity")
 stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
-#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
-stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
+#Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
+stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
+
+#Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
+stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
+names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
+
+#Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
+stockPerCountry <- aggregate(OnlineretailUnique$Country, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
+names(stockPerCountry) <- c("StockCode","NbOfCountry")
 
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
+productData <- merge(productData, stockPerUnitPrice, by="StockCode")
+productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
-productData <- productData[2:4]
+productData <- productData[2:6]
 
 View(productData)
 
@@ -278,12 +288,17 @@ countryData <- countryData[2:4]
 View(countryData)
 
 #----B. GET INTO PCA----
+#Plot of a matrix of data
+pairs(productData)
+
+#Center and scale data
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
+#Perform the pca and returns the results as an object
 pca <- princomp(productData.CR)
 summary(pca)
 plot(pca)
 loadings(pca)
-pairs(productData)
+
 
 #--------------------------------UPDATE 29/12/2018------------------------------------
 
