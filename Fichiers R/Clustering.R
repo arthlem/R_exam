@@ -1,23 +1,23 @@
 ################################################################################
-#               ICHEC - Cours MQ1 - Année Académique 2016-2017                 #
+#               ICHEC - Cours MQ1 - Ann?e Acad?mique 2016-2017                 #
 ################################################################################
 #                   Les Algorithmes de Clustering                              #
 #                                                                              #
 ################################################################################
-# Remarque importante : les commandes R qui seront détaillées ci-dessous 
+# Remarque importante : les commandes R qui seront d?taill?es ci-dessous 
 # sont (au choix):
-# - à recopier manuellement dans l'interface R choisie (option pas si 
-#   inintéressante en termes d'apprentissage)
-# - à copier puis à coller dans l'interface R,
-# - à envoyer du fichier vers l'interface en utilisant la fonction ad hoc de 
+# - ? recopier manuellement dans l'interface R choisie (option pas si 
+#   inint?ressante en termes d'apprentissage)
+# - ? copier puis ? coller dans l'interface R,
+# - ? envoyer du fichier vers l'interface en utilisant la fonction ad hoc de 
 #   l'outil choisi (RStudio, Tinn-R, ...)
 ################################################################################
-# Leçon du 26/04/2017                                                          #
+# Le?on du 26/04/2017                                                          #
 ################################################################################ 
-# Préparation des données                                      
-# Pour cette introduction au clustering nous allons continuer à utiliser les
+# Pr?paration des donn?es                                      
+# Pour cette introduction au clustering nous allons continuer ? utiliser les
 # Iris de Fisher. 
-# Mais pour les besoins de la représentation nous commencerons par une ACP
+# Mais pour les besoins de la repr?sentation nous commencerons par une ACP
 # en ajoutant les composantes au dataset existant.
 # (Some parts of this file are in english, sorry for the vandammisation)
 ################################################################################
@@ -180,7 +180,7 @@ summary(mclust.1)
 
 Mc.1<-mclust.1$classification
 
-plot(mydata[,c("Axis1","Axis2")], col=Mc.1, main="Clusters calculés pas MCLUST." )
+plot(mydata[,c("Axis1","Axis2")], col=Mc.1, main="Clusters calcul?s pas MCLUST." )
 scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=Mc.1, by.groups=TRUE)
 
 # Plot with labels
@@ -221,8 +221,8 @@ plot3d(mydata[,c(1,2,4)], type = "p", col = Sp)
 ################################################################################
 # Exercices: Wholesale Data 
 ################################################################################
-# Le dataset Wholesale_customers_data contient les données d'un grossiste 
-# portugais. La description complète de ce fichier peut être trouvée à l'adresse
+# Le dataset Wholesale_customers_data contient les donn?es d'un grossiste 
+# portugais. La description compl?te de ce fichier peut ?tre trouv?e ? l'adresse
 # suivante : http://archive.ics.uci.edu/ml/datasets/Wholesale+customers
 
 Wholesale <- read.csv("C:/Users/EC/Dropbox/Teaching/ICHEC/MQ/Data/Wholesale/Wholesale customers data.csv")
@@ -238,23 +238,23 @@ Delicassen <-Wholesale[,"Delicassen"]
 Channel <-Wholesale[,"Channel"]
 Region <-Wholesale[,"Region"]
 # Fresh
-plot(density(Fresh),main="Dépenses annuelles en Fresh", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Fresh",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Fresh),main="D?penses annuelles en Fresh", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Fresh",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 # Milk
-plot(density(Milk),main="Dépenses annuelles en Milk", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Milk",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Milk),main="D?penses annuelles en Milk", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Milk",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 # Grocery
-plot(density(Grocery),main="Dépenses annuelles en Grocery", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Grocery",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Grocery),main="D?penses annuelles en Grocery", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Grocery",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 # Frozen
-plot(density(Frozen),main="Dépenses annuelles en Frozen", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Frozen",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Frozen),main="D?penses annuelles en Frozen", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Frozen",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 # Detpaper
-plot(density(Detpaper),main="Dépenses annuelles en Detergents & Paper", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Detergents & Paper",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Detpaper),main="D?penses annuelles en Detergents & Paper", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Detergents & Paper",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 # Delicassen
-plot(density(Delicassen),main="Dépenses annuelles en Delicassen", xlab="Dépenses annuelles")
-hist(Fresh,main="Dépenses annuelles en Delicassen",xlab="Dépenses annuelles",add=TRUE, freq=FALSE)
+plot(density(Delicassen),main="D?penses annuelles en Delicassen", xlab="D?penses annuelles")
+hist(Fresh,main="D?penses annuelles en Delicassen",xlab="D?penses annuelles",add=TRUE, freq=FALSE)
 
 library(ade4)
 pairs(Wholesale[,3:8]) 
@@ -272,7 +272,7 @@ s.corcircle(acp1$co)
 #library(RcmdrMisc)
 Wholesale<-cbind(Wholesale,acp1$li)
 s.corcircle(acp1$co)
-#hist(Fresh,main="Dépenses annuelles en Delicassen",xlab="Dépenses annuelles", freq=FALSE)
+#hist(Fresh,main="D?penses annuelles en Delicassen",xlab="D?penses annuelles", freq=FALSE)
 km1<-kmeans(Wholesale[,3:8],3,iter.max = 10, nstart = 10)
 table(km1$cluster)
 km1$centers
@@ -288,7 +288,7 @@ acp2<-dudi.pca(Wholesale[,3:8], scannf=FALSE, nf=6,center = TRUE, scale = TRUE )
 WholeSale<-cbind(Wholesale[,1:8],acp2$li)
 km2 <- kmeans(scale(WholeSale[,9:14],center = F, scale=F), centers = 3, iter.max = 10, nstart = 10)
 
-# Graphique 3D des 3 premières variables des données: 
+# Graphique 3D des 3 premi?res variables des donn?es: 
 plot3d(WholeSale[,c("Axis1","Axis2", "Axis3")], type = "p",size=10, col = km2$cluster)
 Qinv<-solve(acp2$co)
 lines3d(rbind(c(0,0,0),Qinv[1:3,1]*5),lwd=4, col="green")
@@ -310,9 +310,9 @@ text3d(rbind(Qinv[1:3,6]*4.5),texts = colnames(Wholesale[,3:8])[6], col="black")
 ################################################################################
 
 
-# 1) Effectuez un clustering l'analyse de ses résultats pour les données USArrest des TP précédents 
-#    (pour les 4 première variables seulement).
+# 1) Effectuez un clustering l'analyse de ses r?sultats pour les donn?es USArrest des TP pr?c?dents 
+#    (pour les 4 premi?re variables seulement).
 
-# 2) idem pour les données swiss:
+# 2) idem pour les donn?es swiss:
 data(swiss, package="datasets")
 
