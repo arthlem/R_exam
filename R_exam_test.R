@@ -247,7 +247,7 @@ names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
 #Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
 stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
-names(stockPerUnitPrice) <- c("StockCode","UnitPrice")
+names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
