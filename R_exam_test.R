@@ -241,15 +241,20 @@ names(stockPerQuantity) <- c("StockCode","Quantity")
 stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
-#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
+#Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
 stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
+
+#Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
+stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
+names(stockPerUnitPrice) <- c("StockCode","UnitPrice")
 
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
+productData <- merge(productData, stockPerUnitPrice, by="StockCode")
 row.names(productData) <- productData$StockCode
-productData <- productData[2:4]
+productData <- productData[2:5]
 
 View(productData)
 
