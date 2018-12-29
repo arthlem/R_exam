@@ -1,4 +1,4 @@
-#---------------------------------------------GITHUB----------------------------------------------------
+#---------------------------------------------GITHUB-------------------------------------------------
 #Lors de changements
 #1. git add .
 #2. git commit -m "Le message a envoyer"
@@ -12,12 +12,14 @@
 install.packages("ggplot2")
 install.packages("dplyr")
 install.packages("lubridate")
+install.packages("ade4")
 
 #Libraries to load
 library(dplyr)
 library(ggplot2)
 library(data.table)
 library(lubridate)
+library(ade4)
 #General constants
 turnoverByMonthScale <- 1/1000
 
@@ -223,13 +225,8 @@ SalesData <- OnlineretailClean %>%
 
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
-#<<<<<<< HEAD
-# labs(x="Month", y="Turnover in million")
-#
-#=======
-#  labs(x="Month", y="Turnover in thousand")
-#>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+  labs(x="Month", y="Turnover in thousand")
 
 #-------------------------------------------PCA-------------------------------------------
 #----A. ARANGE DATA SET----
@@ -245,24 +242,19 @@ stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$Un
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
 #Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
-stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
+stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
 #Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
 stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
 names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 
-#Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
-stockPerCountry <- aggregate(OnlineretailUnique$Country, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
-names(stockPerCountry) <- c("StockCode","NbOfCountry")
-
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
 productData <- merge(productData, stockPerUnitPrice, by="StockCode")
-productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
-productData <- productData[2:6]
+productData <- productData[2:5]
 
 View(productData)
 
@@ -288,21 +280,12 @@ countryData <- countryData[2:4]
 View(countryData)
 
 #----B. GET INTO PCA----
-#Plot of a matrix of data
-pairs(productData)
-
-#Center and scale data
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
-#Perform the pca and returns the results as an object
 pca <- princomp(productData.CR)
 summary(pca)
 plot(pca)
 loadings(pca)
-
-
-#--------------------------------UPDATE 29/12/2018------------------------------------
-
-#---------ALL COUNTRIES-------------
+pairs(productData)
 
 countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
 pca2 <- princomp(countryData.CR)
@@ -312,43 +295,16 @@ loadings(pca2)
 pairs(countryData)
 View(countryData)
 
-
-#---------WITHOUT UK----------------
-
 #Same without UK
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
-
 countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
 pca3 <- princomp(countryDataWithoutUK.CR)
 summary(pca3)
 plot(pca3)
 loadings(pca3)
-pairs(countryDataWithoutUK, pch=19)
+pairs(countryDataWithoutUK)
 View(countryDataWithoutUK)
 
-
-#---------WITHOUT UK BUT ONLY BEST SELLING COUNTRIES-----------
-
-#Order by highest turnover, BS stands for Best Selling
-countryDataWithoutUKBS <- countryDataWithoutUK[order(-countryDataWithoutUK$Turnover),]
-#Take the best 17 selling countries
-countryDataWithoutUKBS <- countryDataWithoutUKBS[1:17,]
-
-countryDataWithoutUKBS.CR<-scale(countryDataWithoutUKBS,center=TRUE,scale=TRUE)
-pca3 <- princomp(countryDataWithoutUKBS.CR)
-summary(pca3)
-plot(pca3)
-loadings(pca3)
-pairs(countryDataWithoutUKBS, pch=19)
-View(countryDataWithoutUKBS)
-
-#Let's compare
-
-pairs(countryData, main="All Countries", pch=19)
-pairs(countryDataWithoutUK,main="All Countries Without UK", pch=19)
-pairs(countryDataWithoutUKBS,main="TOP 17 Without UK", pch=19)
-
-#------------END OF UPDATE 29/12/2018------------
 
 #Using ade4
 
@@ -414,181 +370,3 @@ scatter(acp.ade4, posieig="none")
 # Idem mais sans ?tiquettes, les individus ?tant repr?sent? par des points
 scatter(acp.ade4, posieig="none", clab.row=0)
 # Comparez cette visualisation avec la visualisation 3D du debut...
-
-#-------------------------PART 3: CLUSTERING-------------------------
-
-#----------CLUSTERING ProductData------------
-#Cluster analysis or clustering is the task of grouping a set of objects 
-#in such a way that objects in the same group (called a cluster) are more similar (in some sense) 
-#to each other than to those in other groups (clusters). It is a main task of exploratory data mining,
-#and a common technique for statistical data analysis, used in many fields, including machine learning, pattern recognition,
-#image analysis, information retrieval, bioinformatics, data compression, and computer graphics.
-
-#1. Remove missing data with function na.omit (already done before when we removed the empty Customer ID)
-#2. Scale the data (already done in the PCA analysis)
-#3. K-means
-
-#Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
-
-#Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
-productClustering <- productData
-
-pca<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-productClustering<-cbind(productClustering,pca$li)
-
-km1 <- kmeans(productClustering[,1:4], centers = 3, iter.max = 10, nstart = 10)
-table(km1$cluster)
-km1$centers
-
-#Plot the clusters
-pairs(productClustering[,1:4],col=km1$cluster)
-
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
-library(car)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-
-# Same algorithm, but on scaled data.
-km2 <- kmeans(scale(productClustering[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
-# Size of the clusters
-table(km2$cluster)
-# Clusters Centers (with no direct meaning!)
-km2$centers
-# Cluster center on initial variables
-aggregate(productClustering[,1:4], list(km2$cluster), mean)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
-cor(productClustering[,1:4])
-
-# Comparison of the two results
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
-
-# Plot with labels
-plot(productClustering[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering), col=km2$cluster, main="K-means on scaled data", cex=0.7)
-
-#----------CLUSTERING CountryData------------
-
-#Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
-
-#Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
-clusteringCountries <- countryDataWithoutUK
-
-
-pca<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-clusteringCountries<-cbind(clusteringCountries,pca$li)
-
-km1 <- kmeans(clusteringCountries[,1:3], centers = 3, iter.max = 10, nstart = 10)
-table(km1$cluster)
-km1$centers
-
-#Plot the clusters
-pairs(clusteringCountries[,1:3],col=km1$cluster)
-
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
-library(car)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
-
-# Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-
-# Same algorithm, but on scaled data.
-km2 <- kmeans(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
-# Size of the clusters
-table(km2$cluster)
-# Clusters Centers (with no direct meaning!)
-km2$centers
-# Cluster center on initial variables
-aggregate(clusteringCountries[,1:3], list(km2$cluster), mean)
-
-# Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
-cor(clusteringCountries[,1:3])
-
-# Comparison of the two results
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(productData), col=km2$cluster, main="K-means on scaled data", cex=0.50)
-
-#HIERARCHICAL CLUSTERING -> Mieux pour les countries
-
-# Computing the distance matrix
-#mydata.dist<- dist(mydata[,1:4]) # not so good
-clusteringCountries.dist<- dist(scale(clusteringCountries2[,1:3],center = TRUE,scale=TRUE)) # Better
-
-#Hclust with average link
-HClust.1 <- hclust(clusteringCountries.dist, method="average")
-plot(HClust.1, main= "Cluster Dendrogram for Solution HClust.1", xlab=
-       "Observation Number in Data Set", sub="Method=average; Distance=euclidian")
-# Cutting the tree to obtain 3 clusters
-hc.1<-cutree(HClust.1, k=3)
-# Size of the clusters
-table(hc.1)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.1, main="Clusters with average link." )
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries2), col=hc.1, main="K-means on scaled data", cex=0.7)
-
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.1, by.groups=TRUE)
-
-# HClsut single link
-HClust.2 <- hclust(clusteringCountries.dist , method= "single")
-plot(HClust.2, main= "Cluster Dendrogram for Solution HClust.2", xlab=
-       "Observation Number in Data Set", sub="Method=single; Distance=euclidian")
-hc.2<-cutree(HClust.2, k=3)
-# Size of the clusters
-table(hc.2)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.2, main="Clusters with single link." )
-scatterplotMatrix(clusteringCountries[,1:4],smooth=FALSE,groups=hc.2, by.groups=TRUE)
-
-# HClust complete link
-HClust.3 <- hclust(clusteringCountries.dist, method="complete")
-plot(HClust.3, main= "Cluster Dendrogram for Solution HClust.3", xlab=
-       "Observation Number in Data Set", sub="Method=complete; Distance=euclidian")
-hc.3<-cutree(HClust.3, k=3)
-# Size of the clusters
-table(hc.3)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.3, main="Clusters with complete link." )
-scatterplotMatrix(clusteringCountries[,1:4],smooth=FALSE,groups=hc.3, by.groups=TRUE)
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.3, main="K-means on scaled data", cex=0.7)
-
-
-# HClust complete link
-HClust.4 <- hclust(clusteringCountries.dist, method="ward.D")
-plot(HClust.4, main= "Cluster Dendrogram for Solution HClust.4", xlab=
-       "Observation Number in Data Set Iris", sub="Method=Ward; Distance=euclidian")
-hc.4<-cutree(HClust.4, k=3)
-# Size of the clusters
-table(hc.4)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.4, main="Clusters with complete link." )
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.4, by.groups=TRUE)
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.4, main="K-means on scaled data", cex=0.7)
-
-
-  

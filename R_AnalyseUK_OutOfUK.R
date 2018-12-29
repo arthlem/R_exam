@@ -1,4 +1,4 @@
-#---------------------------------------------GITHUB----------------------------------------------------
+#---------------------------------------------GITHUB-------------------------------------------------
 #Lors de changements
 #1. git add .
 #2. git commit -m "Le message a envoyer"
@@ -12,12 +12,14 @@
 install.packages("ggplot2")
 install.packages("dplyr")
 install.packages("lubridate")
+install.packages("ade4")
 
 #Libraries to load
 library(dplyr)
 library(ggplot2)
 library(data.table)
 library(lubridate)
+library(ade4)
 #General constants
 turnoverByMonthScale <- 1/1000
 
@@ -135,11 +137,11 @@ length(ListOfCountry[!duplicated(ListOfCountry), ])
 #4. Number of Customers
 ListOfCustomers <- Onlineretail["CustomerID"]
 length(ListOfCustomers[!duplicated(ListOfCustomers), ])
-
 #5. Amount of purchases for each country
 PurchasesPerCountry <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$Country), FUN=sum)
 #View(PurchasesPerCountry)
 PurchasesNotUk <- PurchasesPerCountry[-36,]
+
 
 #PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
 slices <- PurchasesPerCountry[[2]]
@@ -223,16 +225,12 @@ SalesData <- OnlineretailClean %>%
 
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
-#<<<<<<< HEAD
-# labs(x="Month", y="Turnover in million")
-#
-#=======
-#  labs(x="Month", y="Turnover in thousand")
-#>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+  labs(x="Month", y="Turnover in thousand")
 
 #-------------------------------------------PCA-------------------------------------------
 #----A. ARANGE DATA SET----
+#----PRODUCTS------
 #length(unique(OnlineretailUnique$StockCode))
 
 #Create a dataset per product (StockCode // sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
@@ -245,27 +243,23 @@ stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$Un
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
 #Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
-stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
+stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=length)
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
 #Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
 stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
 names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 
-#Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
-stockPerCountry <- aggregate(OnlineretailUnique$Country, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
-names(stockPerCountry) <- c("StockCode","NbOfCountry")
-
 #Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
 productData <- merge(productData, stockPerUnitPrice, by="StockCode")
-productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
-productData <- productData[2:6]
+productData <- productData[2:5]
 
 View(productData)
 
+#----------COUNTRY-----------
 #Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
 #Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
 countryPerStockCode <- aggregate(OnlineretailUnique$StockCode, by=list(Category=OnlineretailUnique$Country), FUN=length)
@@ -288,17 +282,12 @@ countryData <- countryData[2:4]
 View(countryData)
 
 #----B. GET INTO PCA----
-#Plot of a matrix of data
-pairs(productData)
-
-#Center and scale data
 productData.CR<-scale(productData,center=TRUE,scale=TRUE)
-#Perform the pca and returns the results as an object
 pca <- princomp(productData.CR)
 summary(pca)
 plot(pca)
 loadings(pca)
-
+pairs(productData)
 
 #--------------------------------UPDATE 29/12/2018------------------------------------
 
@@ -348,7 +337,7 @@ pairs(countryData, main="All Countries", pch=19)
 pairs(countryDataWithoutUK,main="All Countries Without UK", pch=19)
 pairs(countryDataWithoutUKBS,main="TOP 17 Without UK", pch=19)
 
-#------------END OF UPDATE 29/12/2018------------
+#------------END OF UPDATE------------
 
 #Using ade4
 
@@ -589,6 +578,3 @@ scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.4, by.groups=
 # Plot with labels
 plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
 text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.4, main="K-means on scaled data", cex=0.7)
-
-
-  
