@@ -9,15 +9,24 @@
 
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 #Libraries to install
-install.packages("ggplot2")
-install.packages("dplyr")
-install.packages("lubridate")
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
+install.packages(pkgs)
 
 #Libraries to load
 library(dplyr)
 library(ggplot2)
 library(data.table)
 library(lubridate)
+library(ade4)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(cluster)
+library(factoextra)
+library(NbClust)
+# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
+library(car)
+
 #General constants
 turnoverByMonthScale <- 1/1000
 
@@ -435,6 +444,19 @@ scatter(acp.ade4, posieig="none", clab.row=0)
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
 
+#Scale productClustering
+productClustering.R <- scale(productClustering)
+
+# Elbow method
+fviz_nbclust(productClustering.R, kmeans, method = "wss") +
+  geom_vline(xintercept = 3, linetype = 2)+
+  labs(subtitle = "Elbow method")
+
+# Silhouette method
+fviz_nbclust(productClustering.R, kmeans, method = "silhouette")+
+  labs(subtitle = "Silhouette method")
+
+
 pca<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
 productClustering<-cbind(productClustering,pca$li)
 
@@ -445,8 +467,6 @@ km1$centers
 #Plot the clusters
 pairs(productClustering[,1:4],col=km1$cluster)
 
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
-library(car)
 scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
@@ -484,6 +504,17 @@ text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering),
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 clusteringCountries <- countryDataWithoutUK
 
+#Scale clusterCountries
+clusteringCountries.R <- scale(clusteringCountries)
+
+# Elbow method
+fviz_nbclust(clusteringCountries.R, kmeans, method = "wss") +
+  geom_vline(xintercept = 2, linetype = 2)+
+  labs(subtitle = "Elbow method")
+
+# Silhouette method
+fviz_nbclust(clusteringCountries.R, kmeans, method = "silhouette")+
+  labs(subtitle = "Silhouette method")
 
 pca<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
 clusteringCountries<-cbind(clusteringCountries,pca$li)
@@ -495,8 +526,6 @@ km1$centers
 #Plot the clusters
 pairs(clusteringCountries[,1:3],col=km1$cluster)
 
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
-library(car)
 scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
@@ -590,5 +619,94 @@ scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.4, by.groups=
 plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
 text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.4, main="K-means on scaled data", cex=0.7)
 
+# 
+#
+# CLUSTER ON WORDS USAGE
+#
+#
 
+uniqueDescriptionList <- unique(OnlineretailClean["Description"]) 
+#Putting a name for col description
+names(uniqueDescriptionList) <- c("Description")
+#Put descriptions in a vector
+descVector <- uniqueDescriptionList[["Description"]]
+#Converting to corpus
+docs <- VCorpus(VectorSource(descVector))
+docnames<-names(docs)
+
+# Remove numbers
+docs<-tm_map(docs, removeNumbers)
+# Convert to lowercase
+docs <- tm_map(docs,content_transformer(tolower))
+
+docs<-tm_map(docs, PlainTextDocument)
+
+# La même manip nous a fait perdre les noms des textes, 
+# on réinjecte les noms qui ont été perdus :
+names(docs)<-docnames
+
+#Let's remove some useless words like colors..
+docs<-tm_map(docs, removeWords, c('pink', 'blue', 'tag', 'green', 'orange','red'))
+#Remove stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+#Remove whitespaces
+docs <- tm_map(docs, stripWhitespace)
+
+#Remove punctuation
+docs <- tm_map(docs, removePunctuation)
+
+#No need for this command because language is english
+#docs <- tm_map(docs,stemDocument)
+
+#Create a term document matrix from the corpus
+dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf)))
+# Frequencies of words
+freq <- colSums(as.matrix(dtm))
+#length should be total number of terms
+length(freq)
+#Removing word with less than 15 repetitions
+freq <- freq[freq>15]
+#new length
+length(freq)
+#create sort order (descending)
+ord <- order(freq,decreasing=TRUE)
+#inspect most frequently occurring terms
+freq[head(ord)]
+freq[ord]
+#inspect least frequently occurring terms
+freq[tail(ord)] 
+
+#That done, let’s take get a list of terms that occur at least a  40 times in the entire corpus. This is easily done using the findFreqTerms() function as follows:
+findFreqTerms(dtm,lowfreq=40)
+
+#findAssocs(dtmr,"hair",0.1)
+
+wf=data.frame(term=names(freq),occurrences=freq)
+ggplot(subset(wf, freq>40), aes(term, occurrences)) +
+  geom_bar(stat="identity") +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+#On construit un data.frame avec les fr?quences de mots:
+mfw<-data.frame(word=names(freq), freq=freq)
+# On s'assure que les mots sont dans l'ordre de fr?quences
+mfw<-mfw[order(mfw[,2], decreasing=TRUE),]
+
+# On fait un barplot des fr?quences
+barplot(mfw[,2], names.arg = mfw[,1],las=2, horiz = TRUE)
+# Heu il y a trop de mots, on n'y voit rien :D
+# On cr?e un nouvel index pour ne retenir que les mots apparaissant au 
+# moins 15 fois:
+mfw2<-subset(mfw, freq[ord]>15)
+# On refait le barplot en ajoutant une palette de couleur (avec la 
+# fonction heatcolors())  contenant autant de couleur que le nombre 
+# de lignes(de mots donc) retenues dan smfw2.
+barplot(mfw2[,2], names.arg = mfw2[,1],las=2,
+        horiz = TRUE, main="Most Frequent Words",
+        col=heat.colors(dim(mfw2)[1]))
+
+#setting the same seed each time ensures consistent look across clouds
+set.seed(42)
+
+#limit words by specifying min frequency and add color
+wordcloud(names(freq),freq,min.freq=10,colors=brewer.pal(6,"Dark2"), random.order=FALSE)
   
