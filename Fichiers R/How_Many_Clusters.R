@@ -4,7 +4,7 @@
 
 data("USArrests")
 data<-USArrests
-
+View(data)
 # The Elbow method
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15
@@ -20,6 +20,7 @@ text(6,590, "Optimal number of Clusters")
 
 
 # Silouhette method
+install.packages("cluster")
 library(cluster)
 
 k.max <- 15
@@ -43,10 +44,11 @@ gap_stat <- clusGap(data, FUN = kmeans, nstart = 25,
 # Print the result
 print(gap_stat, method = "firstmax")
 plot(gap_stat, frame = FALSE, xlab = "Number of clusters k", main="Optimal number of clusters")
-#abline(v = 3, lty = 2)
+abline(v = 3, lty = 2)
 
 
 # NbClust Package
+install.packages("NbClust")
 library("NbClust")
 set.seed(123)
 # The following example determine the number of clusters using gap statistics:
@@ -60,3 +62,4 @@ nb <- NbClust(data, distance = "euclidean", min.nc = 2,
               max.nc = 10, method = "complete", index ="all")
 # Print the result
 nb
+

@@ -87,6 +87,11 @@ beforeCancelations <- dim(OnlineretailClean[])
 OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
 afterCancelations <- dim(OnlineretailClean)
 #Percentage of Cancelations (to finish)
+
+
+#
+# ATTENTION PAS TERMINé !!!!!
+#
 (beforeCancelations-withCancelations)
 
 #Finish cleaning dataset in one line 
