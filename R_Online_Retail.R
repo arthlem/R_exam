@@ -85,8 +85,7 @@ round((135080/541909)*100,digit=2)
 beforeCancelations <- dim(OnlineretailClean[])
 OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
 afterCancelations <- dim(OnlineretailClean)
-#Percentage of Cancelations (to finish)
-(beforeCancelations-withCancelations)
+
 
 #Finish cleaning dataset in one line 
 # DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
@@ -457,8 +456,8 @@ fviz_nbclust(productClustering.R, kmeans, method = "silhouette")+
   labs(subtitle = "Silhouette method")
 
 
-pca<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-productClustering<-cbind(productClustering,pca$li)
+pca4<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
+productClustering<-cbind(productClustering,pca4$li)
 
 km1 <- kmeans(productClustering[,1:4], centers = 3, iter.max = 10, nstart = 10)
 table(km1$cluster)
@@ -516,56 +515,56 @@ fviz_nbclust(clusteringCountries.R, kmeans, method = "wss") +
 fviz_nbclust(clusteringCountries.R, kmeans, method = "silhouette")+
   labs(subtitle = "Silhouette method")
 
-pca<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-clusteringCountries<-cbind(clusteringCountries,pca$li)
+pca5<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
+clusteringCountries<-cbind(clusteringCountries,pca5$li)
 
-km1 <- kmeans(clusteringCountries[,1:3], centers = 3, iter.max = 10, nstart = 10)
-table(km1$cluster)
-km1$centers
+km3 <- kmeans(clusteringCountries[,1:3], centers = 3, iter.max = 10, nstart = 10)
+table(km3$cluster)
+km3$centers
 
 #Plot the clusters
-pairs(clusteringCountries[,1:3],col=km1$cluster)
+pairs(clusteringCountries[,1:3],col=km3$cluster)
 
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km3$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
+plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
 
 # Same algorithm, but on scaled data.
-km2 <- kmeans(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
+km4 <- kmeans(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
 # Size of the clusters
-table(km2$cluster)
+table(km4$cluster)
 # Clusters Centers (with no direct meaning!)
-km2$centers
+km4$centers
 # Cluster center on initial variables
-aggregate(clusteringCountries[,1:3], list(km2$cluster), mean)
+aggregate(clusteringCountries[,1:3], list(km4$cluster), mean)
 
 # Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
+plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster)
+scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=FALSE)
 cor(clusteringCountries[,1:3])
 
 # Comparison of the two results
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
+plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
+plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster, main="K-means on scaled data")
 
 # Plot with labels
 plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(productData), col=km2$cluster, main="K-means on scaled data", cex=0.50)
+text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(productData), col=km4$cluster, main="K-means on scaled data", cex=0.50)
 
 #HIERARCHICAL CLUSTERING -> Mieux pour les countries
 
 # Computing the distance matrix
 #mydata.dist<- dist(mydata[,1:4]) # not so good
-clusteringCountries.dist<- dist(scale(clusteringCountries2[,1:3],center = TRUE,scale=TRUE)) # Better
+clusteringCountries.dist<- dist(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE)) # Better
 
 #Hclust with average link
 HClust.1 <- hclust(clusteringCountries.dist, method="average")
 plot(HClust.1, main= "Cluster Dendrogram for Solution HClust.1", xlab=
        "Observation Number in Data Set", sub="Method=average; Distance=euclidian")
-# Cutting the tree to obtain 3 clusters
-hc.1<-cutree(HClust.1, k=3)
+# Cutting the tree to obtain 2 clusters
+hc.1<-cutree(HClust.1, k=2)
 # Size of the clusters
 table(hc.1)
 
@@ -573,7 +572,7 @@ plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.1, main="Clusters with ave
 
 # Plot with labels
 plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries2), col=hc.1, main="K-means on scaled data", cex=0.7)
+text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.1, main="K-means on scaled data", cex=0.7)
 
 scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.1, by.groups=TRUE)
 
@@ -604,7 +603,7 @@ plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on sca
 text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.3, main="K-means on scaled data", cex=0.7)
 
 
-# HClust complete link
+# HClust Ward.D link
 HClust.4 <- hclust(clusteringCountries.dist, method="ward.D")
 plot(HClust.4, main= "Cluster Dendrogram for Solution HClust.4", xlab=
        "Observation Number in Data Set Iris", sub="Method=Ward; Distance=euclidian")
@@ -625,28 +624,29 @@ text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountri
 #
 #
 
-uniqueDescriptionList <- unique(OnlineretailClean["Description"]) 
+#Cluster on words usage
+
+uniqueDescriptionList <- OnlineretailClean[!duplicated(OnlineretailClean[,c('Description')]),]
+uniqueDescriptionList <- uniqueDescriptionList[c("StockCode", "Description")]
 #Putting a name for col description
-names(uniqueDescriptionList) <- c("Description")
-#Put descriptions in a vector
-descVector <- uniqueDescriptionList[["Description"]]
+names(uniqueDescriptionList) <- c("StockCode","Description")
 #Converting to corpus
-docs <- VCorpus(VectorSource(descVector))
-docnames<-names(docs)
+
+dd<-data.frame(doc_id=uniqueDescriptionList[["StockCode"]],text=uniqueDescriptionList[["Description"]])
+head(dd)
+
+docs <- VCorpus(DataframeSource(dd))
 
 # Remove numbers
 docs<-tm_map(docs, removeNumbers)
 # Convert to lowercase
 docs <- tm_map(docs,content_transformer(tolower))
 
-docs<-tm_map(docs, PlainTextDocument)
+#docs<-tm_map(docs, PlainTextDocument)
 
-# La même manip nous a fait perdre les noms des textes, 
-# on réinjecte les noms qui ont été perdus :
-names(docs)<-docnames
-
+summary(docs)
 #Let's remove some useless words like colors..
-docs<-tm_map(docs, removeWords, c('pink', 'blue', 'tag', 'green', 'orange','red'))
+docs<-tm_map(docs, removeWords, c('pink', 'blue', 'tag', 'green', 'orange','red','black','purple','white','set'))
 #Remove stopwords
 docs <- tm_map(docs, removeWords, stopwords("english"))
 #Remove whitespaces
@@ -659,14 +659,61 @@ docs <- tm_map(docs, removePunctuation)
 #docs <- tm_map(docs,stemDocument)
 
 #Create a term document matrix from the corpus
-dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf)))
+minTermFreq<- 25
+maxTermFreq<-Inf
+dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf), bounds = list(global = c(minTermFreq, maxTermFreq))))
+
+#Clean dtm
+rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document
+dtm   <- dtm[rowTotals> 0, ]
+
+#Tests
+
+dtm_tfxidf <- weightTfIdf(dtm)
+
+dtmss <- removeSparseTerms(dtm, 0.99) # This makes a matrix that is only 25% empty space, maximum.   
+inspect(dtmss) 
+
+d <- dist(t(dtmss), method="euclidian")   
+# Clustering:
+fit <- hclust(d=d, method="complete")   
+# Dendrogram:
+plot(fit)
+plot(fit, hang=-1)# Pour avoir tous les mots ? la m?me hauteur
+# Groupons les mots en 10 groupes:
+groups <- cutree(fit, k=5)   # "k=" defines the number of clusters you are using
+# On ajoute les groupes au dendrogramme:
+rect.hclust(fit, k=5, border="red") # draw dendogram with red borders around 
+# the 10 clusters   
+
+# Sizes of the clusters
+table(groups)
+
+
+##Clustering
+tdm.tfidf <- tm::weightTfIdf(dtm)
+tdm.tfidf <- tm::removeSparseTerms(tdm.tfidf, 0.99) 
+
+m <- as.matrix(dtm_tfxidf)
+
+norm_eucl <- function(m)
+  m/apply(m, 1, function(x) sum(x^2)^.5)
+
+m_norm <- norm_eucl(m)
+results <- kmeans(m_norm, 3)
+
+clusters <- 1:10
+
+for(i in clusters){
+  cat("Cluster ", i, ":", findFreqTerms(dtm_tfxidf[results$cluster== i,], lowfreq=25), "\n\n")
+}
+
+fviz_nbclust(m_norm, kmeans, method = "silhouette")+
+  labs(subtitle = "Silhouette method")
+
 # Frequencies of words
 freq <- colSums(as.matrix(dtm))
 #length should be total number of terms
-length(freq)
-#Removing word with less than 15 repetitions
-freq <- freq[freq>15]
-#new length
 length(freq)
 #create sort order (descending)
 ord <- order(freq,decreasing=TRUE)
@@ -705,8 +752,8 @@ barplot(mfw2[,2], names.arg = mfw2[,1],las=2,
         col=heat.colors(dim(mfw2)[1]))
 
 #setting the same seed each time ensures consistent look across clouds
-set.seed(42)
-
+#set.seed(52)
+old.par <- par(mar = c(0, 0, 0, 0))
+par(old.par)
 #limit words by specifying min frequency and add color
 wordcloud(names(freq),freq,min.freq=10,colors=brewer.pal(6,"Dark2"), random.order=FALSE)
-  
