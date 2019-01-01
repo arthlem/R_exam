@@ -308,7 +308,7 @@ productData.CR<-scale(productData,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaProduct <- princomp(productData.CR)
 
-#Variance-covariance des variables centré et réduite
+#Variance-covariance des variables centr? et r?duite
 covarProduct<-cov(productData.CR)
 #valeurs propres et pourcentage d'info dans les composantes
 summary(pcaProduct)
@@ -327,27 +327,27 @@ pcaProductAde4<-dudi.pca(productData, scannf=FALSE,center = TRUE, scale = TRUE)
 
 # Impression des valeurs propres
 pcaProductAde4$eig
-# Les variances cumulées
+# Les variances cumul?es
 cumsum(pcaProductAde4$eig)
 # Les variances en pourcentages:
 pcaProductAde4$eig/sum(pcaProductAde4$eig)*100
 # Le screeplot:
 barplot(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
-# Les pourcentages cumulés :
+# Les pourcentages cumul?s :
 cumsum(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
 
-#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
 inertia.dudi(pcaProductAde4,col.inertia = T)$col.abs
 
 # Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
 score(pcaProductAde4, xax=1)
 score(pcaProductAde4, xax=2)
 
-#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
-# L'angle entre deux  flèches représente la corrélation qui les lie : 
+#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
+# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
 # - angle aigu = positive;
 # - angle droit = nulle;
-# - angle obtus = négative.
+# - angle obtus = n?gative.
 s.corcircle(pcaProductAde4$co)
 
 #--------------------PCA FOR COUNTRY----------------
@@ -362,7 +362,7 @@ countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaCountry <- princomp(countryData.CR)
 
-#Variance-covariance des variables centré et réduite
+#Variance-covariance des variables centr? et r?duite
 covarCountry<-cov(countryData.CR)
 #valeurs propres et pourcentage d'info dans les composantes
 summary(pcaCountry)
@@ -381,27 +381,27 @@ pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
 
 # Impression des valeurs propres
 pcaCountryAde4$eig
-# Les variances cumulées
+# Les variances cumul?es
 cumsum(pcaCountryAde4$eig)
 # Les variances en pourcentages:
 pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
 # Le screeplot:
 barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
-# Les pourcentages cumulés :
+# Les pourcentages cumul?s :
 cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
 
-#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
 inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
 
 # Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
 score(pcaCountryAde4, xax=1)
 score(pcaCountryAde4, xax=2)
 
-#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
-# L'angle entre deux  flèches représente la corrélation qui les lie : 
+#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
+# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
 # - angle aigu = positive;
 # - angle droit = nulle;
-# - angle obtus = négative.
+# - angle obtus = n?gative.
 s.corcircle(pcaCountryAde4$co)
 
 #--------------------PCA FOR COUNTRY WITHOUT UK----------------
@@ -419,7 +419,7 @@ countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaCountryWithoutUK <- princomp(countryDataWithoutUK.CR)
 
-#Variance-covariance des variables centré et réduite
+#Variance-covariance des variables centr? et r?duite
 covarCountryWithoutUK<-cov(countryDataWithoutUK.CR)
 #valeurs propres et pourcentage d'info dans les composantes
 summary(pcaCountryWithoutUK)
@@ -438,27 +438,27 @@ pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TR
 
 # Impression des valeurs propres
 pcaCountryWithoutUK$eig
-# Les variances cumulées
+# Les variances cumul?es
 cumsum(pcaCountryWithoutUK$eig)
 # Les variances en pourcentages:
 pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100
 # Le screeplot:
 barplot(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
-# Les pourcentages cumulés :
+# Les pourcentages cumul?s :
 cumsum(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
 
-#décompostion l'inertie (la part de la variance totale expliquée) entre les variables et composantes (en 10000 èmes):
+#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
 inertia.dudi(pcaCountryWithoutUK,col.inertia = T)$col.abs
 
 # Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
 score(pcaCountryWithoutUK, xax=1)
 score(pcaCountryWithoutUK, xax=2)
 
-#Cercles de correlation où la longueur des flèches indique la part de leur information représentée par les deux axes: 
-# L'angle entre deux  flèches représente la corrélation qui les lie : 
+#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
+# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
 # - angle aigu = positive;
 # - angle droit = nulle;
-# - angle obtus = négative.
+# - angle obtus = n?gative.
 s.corcircle(pcaCountryWithoutUK$co)
 
 #-------------------------PART 3: CLUSTERING-------------------------
@@ -794,4 +794,4 @@ barplot(mfw2[,2], names.arg = mfw2[,1],las=2,
 old.par <- par(mar = c(0, 0, 0, 0))
 par(old.par)
 #limit words by specifying min frequency and add color
-wordcloud(names(freq),freq,min.freq=10,colors=brewer.pal(6,"Dark2"), random.order=FALSE)
+wordcloud(names(freq),freq,min.freq=25,scale=c(5, .1),colors=brewer.pal(6,"Dark2"), random.order=FALSE)

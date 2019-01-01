@@ -98,11 +98,11 @@ names(uniqueDescriptionList) <- c("StockCode","Description")
 descVector <- uniqueDescriptionList[["Description"]]
 #Converting to corpus
 
-dd<-data.frame(doc_id=uniqueDescriptionList[["StockCode"]],text=uniqueDescriptionList[["Description"]])
+dd<-data.frame(doc_id=uniqueDescriptionList[["Description"]],text=uniqueDescriptionList[["Description"]])
 head(dd)
 
 docs <- VCorpus(DataframeSource(dd))
-docs <- VCorpus(VectorSource(descVector))
+#docs <- VCorpus(VectorSource(descVector))
 #docs <- VCorpus(VectorSource(uniqueDescriptionList))
 summary(docs)
 #docnames<-uniqueDescriptionList[["StockCode"]]
@@ -127,12 +127,12 @@ docs <- tm_map(docs, removePunctuation)
 
 #No need for this command because language is english
 #docs <- tm_map(docs,stemDocument)
-
+summary(docs)
 #Create a term document matrix from the corpus
 minTermFreq<- 25
 maxTermFreq<-Inf
 dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf), bounds = list(global = c(minTermFreq, maxTermFreq))))
-View(dtm)
+colnames(dtm)
 #Clean dtm
 rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document
 dtm   <- dtm[rowTotals> 0, ]
@@ -233,3 +233,66 @@ set.seed(52)
 
 #limit words by specifying min frequency and add color
 wordcloud(names(freq),freq,min.freq=10,colors=brewer.pal(6,"Dark2"), random.order=FALSE)
+
+freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("Rgraphviz", version = "3.8")
+
+minTermFreq<- 80
+maxTermFreq<-Inf
+dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf), bounds = list(global = c(minTermFreq, maxTermFreq))))
+View(dtm)
+#Clean dtm
+rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document
+dtm   <- dtm[rowTotals> 0, ]
+
+words <- dtm                                                          %>%
+  as.matrix                                                           %>%
+  colnames                                                            %>%
+  (function(x) x[nchar(x) < 20])
+
+length(words)
+summary(nchar(words))
+
+install.packages("lda")
+library(lda)
+## Error in library(lda):  there is no package called ’lda’
+# From demo(lda)
+library("ggplot2")
+library("reshape2")
+data(cora.documents)
+data(cora.vocab)
+K <- 10;
+result <- lda.collapsed.gibbs.sampler(cora.documents,
+                                      K, ## Num clusters
+                                      cora.vocab,
+                                      25, ## Num iterations
+                                      0.1,
+                                      0.1,
+                                      compute.log.likelihood=TRUE)
+top.words <- top.topic.words(result$topics, 5, by.score=TRUE)
+## Number of documents to display
+N <- 10
+topic.proportions <- t(result$document_sums) / colSums(result$document_sums)
+## Error in t(result$document sums): object ’result’ not found
+topic.proportions <-
+  topic.proportions[sample(1:dim(topic.proportions)[1], N),]
+## Error in eval(expr, envir, enclos):  object ’topic.proportions’ not found
+topic.proportions[is.na(topic.proportions)] <-  1 / K
+## Error in topic.proportions[is.na(topic.proportions)] <- 1/K: object ’topic.proportions’
+#not found
+colnames(topic.proportions) <- apply(top.words, 2, paste, collapse=" ")
+## Error in apply(top.words, 2, paste, collapse = " "):  object ’top.words’ not found
+topic.proportions.df <- melt(cbind(data.frame(topic.proportions),
+                                   document=factor(1:N)),
+                             variable.name="topic",
+                             id.vars = "document")
+## Error in data.frame(topic.proportions):  object ’topic.proportions’ not found
+ggplot(topic.proportions.df, aes(x=topic, y=value, fill=topic)) +
+  geom_bar(stat="identity") +
+  theme(axis.text.x = element_text(angle=45, hjust=1, size=7),
+        legend.position="none") +
+  coord_flip() +
+  facet_wrap(~ document, ncol=5)

@@ -1,15 +1,16 @@
 ---
 title: "Présentation R"
-author: "Arthur Lemoine, François Someville, Alexandre Antippas"
+author: "Arthur Lemoine, François Somville, Alexandre Antippas"
 date: "Janvier 2019"
-output: ioslides_presentation
+output:
+  beamer_presentation: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 chooseCRANmirror(graphics=FALSE, ind=1)
 pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
-install.packages(pkgs)
+#install.packages(pkgs)
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -27,31 +28,30 @@ library(NbClust)
 load("data.RData")
 ```
 
-## R Markdown
+## Plan
+- Introduction
+- Exploration du Dataset
+- Statistiques descriptives
+- Analyse des composantes principales (ACP)
+- Clustering
+- Bonus
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Introduction 
+Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
-
+## Exploration du Dataset 
+### Nombre d'enregistrements
 ```{r}
-
+nrow(Onlineretail)
+```
+### Nombre de variables
+```{r}
+length(Onlineretail)
 ```
 
-
-## Slide with Bullets
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-## Slide with R Output
-
-```{r cars, echo = TRUE}
-summary(cars)
+## Exploration du Dataset 
+### Les différentes variables
+```{r}
+str(Onlineretail)
 ```
 
-## Slide with Plot
-
-```{r pressure}
-plot(pressure)
-```
