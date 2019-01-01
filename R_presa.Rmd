@@ -40,6 +40,11 @@ load("data.RData")
 Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.
 
 Le dataset contient: nb de lignes
+```{r}
+head(select(Onlineretail, InvoiceDate), 5)
+tail(select(Onlineretail, InvoiceDate), 5)
+```
+
 Couvrant la période: head et tail
 
 ## Exploration des données dans le Dataset 
@@ -54,3 +59,6 @@ length(Onlineretail)
 Ajouter la signification des variables
 
 ### Nombre de pays différents
+```{r}
+dim(Onlineretail)-dim(OnlineretailClean)
+```
