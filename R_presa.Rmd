@@ -4,6 +4,8 @@ author: "Arthur Lemoine, François Somville, Alexandre Antippas"
 date: "Janvier 2019"
 output:
   beamer_presentation: default
+fontsize: 11pt
+geometry: margin=1in
 ---
 
 ```{r setup, include=FALSE}
@@ -49,9 +51,9 @@ nrow(Onlineretail)
 length(Onlineretail)
 ```
 
-## Exploration du Dataset 
+## Exploration du Dataset
 ### Les différentes variables
-```{r}
-str(Onlineretail)
+```{r echo=FALSE, out.width="400px"}
+colnames(Onlineretail)
 ```
 
