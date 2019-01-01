@@ -572,7 +572,7 @@ plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.1, main="Clusters with ave
 
 # Plot with labels
 plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries2), col=hc.1, main="K-means on scaled data", cex=0.7)
+text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.1, main="K-means on scaled data", cex=0.7)
 
 scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.1, by.groups=TRUE)
 
@@ -709,4 +709,3 @@ set.seed(42)
 
 #limit words by specifying min frequency and add color
 wordcloud(names(freq),freq,min.freq=10,colors=brewer.pal(6,"Dark2"), random.order=FALSE)
-  
