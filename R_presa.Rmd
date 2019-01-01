@@ -29,29 +29,28 @@ load("data.RData")
 ```
 
 ## Plan
-- Introduction
-- Exploration du Dataset
-- Statistiques descriptives
-- Analyse des composantes principales (ACP)
-- Clustering
-- Bonus
+1. Introduction
+2. Exploration du Dataset
+3. Statistiques descriptives
+4. Analyse des composantes principales (ACP)
+5. Clustering
+6. Bonus
 
-## Introduction 
+## 1. Introduction 
 Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.
 
-## Exploration du Dataset 
+Le dataset contient: nb de lignes
+Couvrant la période: head et tail
+
+## Exploration des données dans le Dataset 
 ### Nombre d'enregistrements
 ```{r}
 nrow(Onlineretail)
 ```
-### Nombre de variables
+### Exploration des variables
 ```{r}
 length(Onlineretail)
 ```
+Ajouter la signification des variables
 
-## Exploration du Dataset 
-### Les différentes variables
-```{r}
-str(Onlineretail)
-```
-
+### Nombre de pays différents
