@@ -138,15 +138,50 @@ plot4 <- ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
 grid.arrange(plot3, plot4, ncol=2)
 ```
 
-## ACP
+## ACP produits
 ### Pairs
-```{r}
+```{r comment=NA}
 pairs(productData)
 ```
 
-## ACP
+## ACP produits
 ### Cor
-```{r}
+```{r comment=NA}
 cor(productData)
 ```
 
+## ACP produits
+### Summary
+```{r comment=NA}
+summary(pcaProduct)
+```
+
+## ACP produits
+### Plots
+```{r comment=NA}
+plot(pcaProduct)
+```
+
+## ACP produits
+### Ade4
+```{r comment=NA}
+score(pcaProductAde4, xax=1)
+```
+
+## ACP produits
+### Ade4
+```{r comment=NA}
+score(pcaProductAde4, xax=2)
+```
+
+## ACP produits
+### Ade4
+```{r comment=NA}
+s.corcircle(pcaProductAde4$co)
+```
+
+## ACP pays
+### Pas intéressant
+```{r comment=NA}
+plot(pcaCountry)
+```
