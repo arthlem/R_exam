@@ -107,6 +107,10 @@ beforeCancelations - afterCancelations
 ```
 
 ## StockCode POST, D, ...
+```{r}
+
+```
+
 
 ## Nettoyage du dataset
 ### Suppression des données inutiles
@@ -124,7 +128,7 @@ cat("Pourcentage retiré :", 100 - (nrow(OnlineretailClean)/nrow(Onlineretail)*1
 cat("Nombre de factures (uniques):",length(unique(Onlineretail$InvoiceNo)))
 cat("Nombre de produits (uniques):",length(unique(Onlineretail$StockCode)))
 cat("Nombre de clients (uniques):",length(unique(Onlineretail$CustomerID)))
-cat("Nombre de pays:",length(unique(Onlineretail$Country)), "Attention 37 + undefined")
+cat("Nombre de pays:",length(unique(Onlineretail$Country)), "(Attention 37 + undefined)")
 
 cat("Summary des quantités","\n")
 summary(Onlineretail$Quantity)
