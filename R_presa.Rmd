@@ -3,7 +3,7 @@ title: "Présentation R"
 author: "Arthur Lemoine, François Somville, Alexandre Antippas"
 date: "Janvier 2019"
 output:
-  beamer_presentation: default
+  ioslides_presentation
 fontsize: 11pt
 geometry: margin=1in
 ---
@@ -11,7 +11,7 @@ geometry: margin=1in
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 chooseCRANmirror(graphics=FALSE, ind=1)
-pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust","gridExtra")
 #install.packages(pkgs)
 library(dplyr)
 library(ggplot2)
@@ -24,6 +24,7 @@ library(wordcloud)
 library(cluster)
 library(factoextra)
 library(NbClust)
+library(gridExtra)
 ```
 
 ```{r load myData, include=FALSE}
@@ -31,29 +32,121 @@ load("data.RData")
 ```
 
 ## Plan
-- Introduction
-- Exploration du Dataset
-- Statistiques descriptives
-- Analyse des composantes principales (ACP)
-- Clustering
-- Bonus
+1. Introduction
+2. Exploration du Dataset
+3. Statistiques descriptives
+4. Analyse des composantes principales (ACP)
+5. Clustering
+6. Bonus
 
-## Introduction 
+## 1. Introduction 
 Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.
 
-## Exploration du Dataset 
-### Nombre d'enregistrements
-```{r}
-nrow(Onlineretail)
-```
-### Nombre de variables
-```{r}
-length(Onlineretail)
+Le dataset contient: nb de lignes
+```{r comment=NA}
+head(select(Onlineretail, InvoiceDate), 5)
+tail(select(Onlineretail, InvoiceDate), 5)
 ```
 
-## Exploration du Dataset
+Couvrant la période: head et tail
+
+## Exploration des données dans le Dataset 
+### Nombre d'enregistrements
+```{r comment=NA}
+nrow(Onlineretail)
+```
+
 ### Les différentes variables
-```{r echo=FALSE, out.width="400px"}
+```{r comment=NA}
 colnames(Onlineretail)
+```
+
+
+## Exploration du Dataset
+### Nombre de pays différents
+```{r comment=NA}
+length(ListOfCountry[!duplicated(ListOfCountry), ])
+```
+
+### Nombre clients
+```{r comment=NA}
+length(ListOfCustomers[!duplicated(ListOfCustomers), ])
+```
+### Nombre de factures
+```{r comment=NA}
+length(ListOfInvoices[!duplicated(ListOfInvoices), ])
+```
+
+## Facture annulées
+
+## StockCode POST, D, ...
+
+## Nettoyage du dataset
+### Suppression des données inutiles
+
+```{r comment=NA}
+cat(nrow(Onlineretail),"lignes à la base")
+cat(nrow(OnlineretailClean), "lignes après nettoyage")
+cat("Pourcentage retiré :", 100 - (nrow(OnlineretailClean)/nrow(Onlineretail)*100), "%")
+```
+
+## Statistique descriptive
+
+### Visualisation des données
+```{r comment=NA}
+cat("Nombre de factures (uniques):",length(unique(Onlineretail$InvoiceNo)))
+cat("Nombre de produits (uniques):",length(unique(Onlineretail$StockCode)))
+cat("Nombre de clients (uniques):",length(unique(Onlineretail$CustomerID)))
+cat("Nombre de pays:",length(unique(Onlineretail$Country)), "Attention 37 + undefined")
+
+cat("Summary des quantités","\n")
+summary(Onlineretail$Quantity)
+
+```
+
+## Statistique descriptive
+### Quelques graphs (1/2)
+```{r}
+plot1 <- ggplot(monthData, aes(InvoiceMonth, n)) +               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Mois", y="Nombre de factures par mois en 2011")
+
+plot2 <- ggplot(dayData, aes(InvoiceWeekday, n)) +               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Jour de la semaine", y="Nombre de factures par jours de la semaine en 2011")
+
+
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+## Statistique descriptive
+### Quelques graphs (2/2)
+```{r}
+plot3 <- ggplot(hourData, aes(InvoiceHour, n)) +               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Heure", y="Nombre de factures par heure en 2011")
+
+plot4 <- ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)+
+  labs(x="Mois", y="Chiffre d'affaire en milliers")
+
+grid.arrange(plot3, plot4, ncol=2)
+```
+
+## ACP
+### Pairs
+```{r}
+pairs(productData)
+```
+
+## ACP
+### Cor
+```{r}
+cor(productData)
 ```
 
