@@ -39,31 +39,53 @@ load("data.RData")
 5. Clustering
 6. Bonus
 
-## 1. Introduction 
-Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.
+## 1. Introduction: Les données
+- <b>Description:</b>
+<br>Le dataset contient toutes les ventes émises par un magasin en ligne basé en Angleterre. Le magasin vend des cadeaux uniques pour toutes les occasions.
 
-Le dataset contient: nb de lignes
+- <b>Début:</b>
 ```{r comment=NA}
-head(select(Onlineretail, InvoiceDate), 5)
-tail(select(Onlineretail, InvoiceDate), 5)
+head(select(Onlineretail, InvoiceDate), 1)
+```
+- <b>Fin:</b>
+```{r comment=NA}
+tail(select(Onlineretail, InvoiceDate), 1)
 ```
 
-Couvrant la période: head et tail
+## 2. Exploration des données dans le Dataset 
+## Les variables (1/2)
 
-## Exploration des données dans le Dataset 
-### Nombre d'enregistrements
+- <b>Nombre de variables</b>
 ```{r comment=NA}
-nrow(Onlineretail)
+length(Onlineretail)
 ```
-
-### Les différentes variables
+- <b>Nom des variables:</b>
 ```{r comment=NA}
 colnames(Onlineretail)
 ```
 
+## Les variables (2/2)
+### Détails:
+<font size="4"> 
+1. <b>InvoiceNo:</b> Contient le numéro de la facture <br>
+2. <b>StockCode:</b> Numéro d'identification du produit (C indique une annulation)<br>
+3. <b>Description:</b> Description du produit<br>
+4. <b>Quantity:</b> Quanitités de pièces commandé<br>
+5. <b>InvoiceDate:</b> Date de la facture avec l'heure<br>
+6. <b>UnitPrice:</b> Prix de l'unité en livre sterling<br>
+7. <b>CustomerID:</b> ID du client (NA lors de modification de stock)<br>
+8. <b>Country:</b> Pays destinataire<br> </font size>
+
+### Nombre d'enregistrements
+```{r comment=NA}
+nrow(Onlineretail)
+```
+<font size="5">Un enregistrement <b>n'est pas égal</b> à une facture!</font size>
 
 ## Exploration du Dataset
+
 ### Nombre de pays différents
+
 ```{r comment=NA}
 length(ListOfCountry[!duplicated(ListOfCountry), ])
 ```
@@ -72,12 +94,17 @@ length(ListOfCountry[!duplicated(ListOfCountry), ])
 ```{r comment=NA}
 length(ListOfCustomers[!duplicated(ListOfCustomers), ])
 ```
+
 ### Nombre de factures
 ```{r comment=NA}
 length(ListOfInvoices[!duplicated(ListOfInvoices), ])
 ```
 
 ## Facture annulées
+Nombre de produits annulés
+```{r comment=NA}
+beforeCancelations - afterCancelations
+```
 
 ## StockCode POST, D, ...
 

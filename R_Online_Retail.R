@@ -82,10 +82,10 @@ dim(Onlineretail)-dim(OnlineretailClean)
 round((135080/541909)*100,digit=2)
 
 #Remove Invoices beggining with C
-beforeCancelations <- dim(OnlineretailClean[])
+beforeCancelations <- nrow(OnlineretailClean)
 OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
-afterCancelations <- dim(OnlineretailClean)
-
+afterCancelations <- nrow(OnlineretailClean)
+beforeCancelations - afterCancelations
 
 #Finish cleaning dataset in one line 
 # DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')

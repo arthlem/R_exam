@@ -112,38 +112,51 @@
 <li>Bonus</li>
 </ol>
 
-</article></slide><slide class=""><hgroup><h2>1. Introduction</h2></hgroup><article  id="introduction">
+</article></slide><slide class=""><hgroup><h2>1. Introduction: Les données</h2></hgroup><article  id="introduction-les-donnees">
 
-<p>Le dataset contient toutes les factures émise par un magasin en ligne basé en Angleterre. Le magasin vends des cadeaux uniques pour toutes les occasions.</p>
-
-<p>Le dataset contient: nb de lignes</p>
+<ul>
+<li><p><b>Description:</b> <br>Le dataset contient toutes les ventes émises par un magasin en ligne basé en Angleterre. Le magasin vend des cadeaux uniques pour toutes les occasions.</p></li>
+<li><p><b>Début:</b></p></li>
+</ul>
 
 <pre >    InvoiceDate
-1 1/12/10 08:26
-2 1/12/10 08:26
-3 1/12/10 08:26
-4 1/12/10 08:26
-5 1/12/10 08:26</pre>
+1 1/12/10 08:26</pre>
+
+<ul>
+<li><b>Fin:</b></li>
+</ul>
 
 <pre >         InvoiceDate
-541905 9/12/11 12:50
-541906 9/12/11 12:50
-541907 9/12/11 12:50
-541908 9/12/11 12:50
 541909 9/12/11 12:50</pre>
 
-<p>Couvrant la période: head et tail</p>
+</article></slide><slide class=""><hgroup><h2>2. Exploration des données dans le Dataset</h2></hgroup><article  id="exploration-des-donnees-dans-le-dataset">
 
-</article></slide><slide class=""><hgroup><h2>Exploration des données dans le Dataset</h2></hgroup><article  id="exploration-des-donnees-dans-le-dataset">
+</article></slide><slide class=""><hgroup><h2>Les variables (1/2)</h2></hgroup><article  id="les-variables-12">
+
+<ul>
+<li><b>Nombre de variables</b></li>
+</ul>
+
+<pre >[1] 8</pre>
+
+<ul>
+<li><b>Nom des variables:</b></li>
+</ul>
+
+<pre >[1] &quot;InvoiceNo&quot;   &quot;StockCode&quot;   &quot;Description&quot; &quot;Quantity&quot;    &quot;InvoiceDate&quot;
+[6] &quot;UnitPrice&quot;   &quot;CustomerID&quot;  &quot;Country&quot;    </pre>
+
+</article></slide><slide class=""><hgroup><h2>Les variables (2/2)</h2></hgroup><article  id="les-variables-22">
+
+<h3>Détails:</h3>
+
+<p><font size="4"> 1. <b>InvoiceNo:</b> Contient le numéro de la facture <br> 2. <b>StockCode:</b> Numéro d&#39;identification du produit (C indique une annulation)<br> 3. <b>Description:</b> Description du produit<br> 4. <b>Quantity:</b> Quanitités de pièces commandé<br> 5. <b>InvoiceDate:</b> Date de la facture avec l&#39;heure<br> 6. <b>UnitPrice:</b> Prix de l&#39;unité en livre sterling<br> 7. <b>CustomerID:</b> ID du client (NA lors de modification de stock)<br> 8. <b>Country:</b> Pays destinataire<br> </font size></p>
 
 <h3>Nombre d&#39;enregistrements</h3>
 
 <pre >[1] 541909</pre>
 
-<h3>Les différentes variables</h3>
-
-<pre >[1] &quot;InvoiceNo&quot;   &quot;StockCode&quot;   &quot;Description&quot; &quot;Quantity&quot;    &quot;InvoiceDate&quot;
-[6] &quot;UnitPrice&quot;   &quot;CustomerID&quot;  &quot;Country&quot;    </pre>
+<p><font size="5">Un enregistrement <b>n&#39;est pas égal</b> à une facture!</font size></p>
 
 </article></slide><slide class=""><hgroup><h2>Exploration du Dataset</h2></hgroup><article  id="exploration-du-dataset">
 
@@ -160,6 +173,8 @@
 <pre >[1] 25900</pre>
 
 </article></slide><slide class=""><hgroup><h2>Facture annulées</h2></hgroup><article  id="facture-annulees">
+
+<pre >[1] 8905    0</pre>
 
 </article></slide><slide class=""><hgroup><h2>StockCode POST, D, &#8230;</h2></hgroup><article  id="stockcode-post-d-...">
 
