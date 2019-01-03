@@ -1,5 +1,5 @@
 ---
-title: "Présentation R"
+title: "Présentation R: Online Retail"
 author: "Arthur Lemoine, François Somville, Alexandre Antippas"
 date: "Janvier 2019"
 output:
