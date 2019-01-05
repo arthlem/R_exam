@@ -1,18 +1,9 @@
-#---------------------------------------------GITHUB----------------------------------------------------
-#Lors de changements
-#1. git add .
-#2. git commit -m "Le message a envoyer"
-#3. git push
-
-#Pour récupérer les changements
-#git pull
-
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 #Libraries to install
 pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
 install.packages(pkgs)
 
-#Libraries to load
+#Load the libraries we just downloaded, necessary for the script to work properly
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -24,7 +15,6 @@ library(wordcloud)
 library(cluster)
 library(factoextra)
 library(NbClust)
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
 library(car)
 
 #General constants
@@ -36,14 +26,11 @@ onlineRetail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.name
 #Check if the data has been imported correctly
 #View(onlineRetail)
 
-#Match canceled orders and  corresponding orders
-productsPerInvoice <- aggregate(onlineRetail$Quantity, by=list(category=onlineRetail$InvoiceNo), FUN=sum)
-
 #Explore the varibales
 #How many variables do we have?
 length(onlineRetail)
 
-#What are the different variables?
+#What are the names of the different variables? And which type of data do they have?
 str(onlineRetail)
 
 #Number of unique InvoiceNo (orders)
@@ -52,19 +39,15 @@ length(unique(onlineRetail$InvoiceNo))
 #Number of unique StockCode (different products)
 length(unique(onlineRetail$StockCode))
 
-#Number of unique Description (different products): Compare with the length of StockCode
+#Number of unique Description (different products): To compare with the length of StockCode
 length(unique(onlineRetail$Description))
 
 #Analysis of Quantity
 summary(onlineRetail$Quantity)
 
-#InvoiceData -> Select function has been taken from the library dplyr
-#Check when the records started and when it ended
+#Check when the records started and when it ended (Start date and End date)
 head(select(onlineRetail, InvoiceDate), 10)
 tail(select(onlineRetail, InvoiceDate), 10)
-
-#UnitPrice, not working?
-#summary(onlineRetail$UnitPrice)
 
 #CustomerID, show th enumber of unique Customers
 length(unique(onlineRetail$CustomerID))
@@ -76,29 +59,28 @@ length(unique(onlineRetail$Country))
 #Removing the missing variables (CustomerID that are empty)
 onlineRetailClean <- subset(onlineRetail, CustomerID != "")
 
-#Counting the number of removed variables (missing CustomerID)
+#Counting the number variables that have been removed (missing CustomerID)
 dim(onlineRetail)-dim(onlineRetailClean)
-#Percentage of empty data
-round((135080/541909)*100,digit=2)
+#Percentage of data removed:
+paste(round((135080/541909)*100,digit=2), "%", sep="")
 
-#Remove Invoices beggining with C
+#Remove canceled invoices: these invoices are beggining with C
+#Count number of records (canceled included)
 beforeCancelations <- nrow(onlineRetailClean)
 onlineRetailClean <- subset(onlineRetailClean, grepl("^(?!C).*$", onlineRetailClean$InvoiceNo, perl = TRUE))
+#Count number of records after having removed the canceled invoices
 afterCancelations <- nrow(onlineRetailClean)
+#Number of records removed
 beforeCancelations - afterCancelations
 
-#Finish cleaning dataset in one line 
-# DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
-# 
-# onlineRetailClean <- subset(onlineRetailClean, !(StockCode %in% DataToRemove))
-
+#Remove other records that aren't orders
 #Remove POSTAGE
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "POST")
 
 #Remove Discount
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "D")
 
-#Remove CARRIAGE
+#Remove C2
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "C2")
 
 #Remove Manual
@@ -107,10 +89,10 @@ onlineRetailClean <- subset(onlineRetailClean, StockCode != "M")
 #Remove Bank Charges
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "BANK CHARGES")
 
-#Remove PADS TO MATCH ALL CUSHIONS 
+#Remove PADS 
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "PADS")
 
-#Remove DOTCOM POSTAGE
+#Remove DOT
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "DOT")
 
 #Remove Unit Price <= 0
@@ -121,38 +103,38 @@ onlineRetailClean <- subset(onlineRetailClean, Quantity > 0)
 
 #Remove Duplicates
 onlineRetailUnique <- unique(onlineRetailClean)
+#Number of duplicate lines removed
 dim(onlineRetailClean)-dim(onlineRetailUnique)
 
-#Compute total revenue per row
-#setDT(onlineRetailClean)[, TotalPrice := as.numeric(as.character(UnitPrice))*Quantity]
-
+#We add a new column to compute the total price
 onlineRetailClean <- onlineRetailClean %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
 #1. Number of invoices (orders)
-listOfInvoices <- onlineRetail["InvoiceNo"]
+listOfInvoices <- onlineRetailUnique["InvoiceNo"]
 length(listOfInvoices[!duplicated(listOfInvoices), ])
 #2. Number of products
-listOfProducts <- onlineRetail["StockCode"]
+listOfProducts <- onlineRetailUnique["StockCode"]
 length(listOfProducts[!duplicated(listOfProducts), ])
 #3. Number of Countries
-listOfCountry <- onlineRetail["Country"]
+listOfCountry <- onlineRetailUnique["Country"]
 length(listOfCountry[!duplicated(listOfCountry), ])
 #4. Number of Customers
-listOfCustomers <- onlineRetail["CustomerID"]
+listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
 
-#5. Amount of purchases for each country
-purchasesPerCountry <- aggregate(onlineRetail$Quantity, by=list(Category=onlineRetail$Country), FUN=sum)
-#View(purchasesPerCountry)
+#5. Groupe the amount of purchases for each country
+purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
+
+#6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[-36,]
 
 #PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
 slices <- purchasesPerCountry[[2]]
 lbls <- purchasesPerCountry[[1]]
-pie(slices, labels = lbls, main="Pie Chart of Countries without UK")
+pie(slices, labels = lbls, main="Pie Chart of Sales")
 
 #Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries (!!)
 slicesNotUK <- purchasesNotUk[[2]]
@@ -161,12 +143,12 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
 
 
 #Countries with the most returns
-returns <- subset(onlineRetail,Quantity<0)
+returns <- subset(onlineRetailUnique,Quantity<0)
 countriesWithReturns <- aggregate(returns$Quantity, by=list(Category=returns$Country), FUN=sum)
 View(countriesWithReturns)
 
 #Sales per product
-salesPerProduct <- aggregate(onlineRetail$Quantity, by=list(StockCode=onlineRetail$StockCode), FUN=sum)
+salesPerProduct <- aggregate(onlineRetailUnique$Quantity, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
 View(salesPerProduct)
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
 #TO DO: Show the most returned product (!!)
@@ -174,25 +156,25 @@ boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outlin
 #Analysis of the % of quantity returned in comparison with the number ordered
 ((-countriesWithReturns[29,2]) / purchasesPerCountry[36,2])*100
 
-boxplot(onlineRetail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+boxplot(onlineRetailUnique, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
 
 #Invoices per month in 2011
 
 #Check format of dates
-onlineRetailClean$InvoiceDate <- mdy_hm(onlineRetailClean$InvoiceDate)
+onlineRetailUnique$InvoiceDate <- mdy_hm(onlineRetailUnique$InvoiceDate)
 
 #Creating object for date's year
-onlineRetailClean$InvoiceYear <- year(onlineRetailClean$InvoiceDate)
+onlineRetailUnique$InvoiceYear <- year(onlineRetailUnique$InvoiceDate)
 #Creating object for date's month
-onlineRetailClean$InvoiceMonth <- month(onlineRetailClean$InvoiceDate,label=T)
+onlineRetailUnique$InvoiceMonth <- month(onlineRetailUnique$InvoiceDate,label=T)
 #Creating object for date's day
-onlineRetailClean$InvoiceWeekday <- wday(onlineRetailClean$InvoiceDate, label=T)
+onlineRetailClean$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=T)
 #Creating object for date's hour
-onlineRetailClean$InvoiceHour <- hour(onlineRetailClean$InvoiceDate)
-View(onlineRetailClean)
+onlineRetailClean$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
+View(onlineRetailUnique)
 #Number of invoices per month in 2011
 #Filter to select year 2011 and count invoices for each month
-monthData <- onlineRetailClean %>% 
+monthData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceMonth)
 
@@ -203,7 +185,7 @@ ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day
 
 #Number of invoices per day in 2011
 #Filter to select year 2011 and count invoices for each day of the week
-dayData <- onlineRetailClean %>% 
+dayData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceWeekday)
 
@@ -214,7 +196,7 @@ ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day
 
 #Number of invoices per hour in 2011
 #Filter to select year 2011 and count invoices for each hour of the day
-hourData <- onlineRetailClean %>% 
+hourData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceHour)
 
@@ -224,7 +206,7 @@ ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day
   labs(x="hour", y="Number of invoices")
 
 #Turnover per month in 2011
-SalesData <- onlineRetailClean %>%
+SalesData <- onlineRetailUnique %>%
   dplyr::filter(InvoiceYear == 2011) %>%
   group_by(InvoiceMonth) %>%
   summarise(CA = sum(TotalPrice))
