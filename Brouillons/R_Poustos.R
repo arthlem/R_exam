@@ -1,6 +1,6 @@
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 #Libraries to install
-pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust","RcmdrMisc")
 install.packages(pkgs)
 
 #Load the libraries we just downloaded, necessary for the script to work properly
@@ -16,6 +16,7 @@ library(cluster)
 library(factoextra)
 library(NbClust)
 library(car)
+library(RcmdrMisc)
 
 #General constants
 turnoverByMonthScale <- 1/1000
@@ -397,20 +398,7 @@ plot(pcaCountryWithoutUK)
 
 #-------------------------PART 3: CLUSTERING-------------------------
 
-#----------CLUSTERING ProductData------------
-#Cluster analysis or clustering is the task of grouping a set of objects 
-#in such a way that objects in the same group (called a cluster) are more similar (in some sense) 
-#to each other than to those in other groups (clusters). It is a main task of exploratory data mining,
-#and a common technique for statistical data analysis, used in many fields, including machine learning, pattern recognition,
-#image analysis, information retrieval, bioinformatics, data compression, and computer graphics.
-
-#1. Remove missing data with function na.omit (already done before when we removed the empty Customer ID)
-#2. Scale the data (already done in the PCA analysis)
-#3. K-means
-
-#Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
+#----CLUSTERING: ProductData----
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
