@@ -62,7 +62,7 @@ onlineRetailClean <- subset(onlineRetail, CustomerID != "")
 #Counting the number variables that have been removed (missing CustomerID)
 dim(onlineRetail)-dim(onlineRetailClean)
 #Percentage of data removed:
-round((135080/541909)*100,digit=2)
+paste(round((135080/541909)*100,digit=2), "%", sep="")
 
 #Remove Invoices beggining with C
 beforeCancelations <- nrow(onlineRetailClean)
