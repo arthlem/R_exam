@@ -87,23 +87,23 @@ nrow(Onlineretail)
 ### Nombre de pays différents
 
 ```{r comment=NA}
-length(ListOfCountry[!duplicated(ListOfCountry), ])
+cat(length(ListOfCountry[!duplicated(ListOfCountry), ]))
 ```
 
 ### Nombre clients
 ```{r comment=NA}
-length(ListOfCustomers[!duplicated(ListOfCustomers), ])
+cat(length(ListOfCustomers[!duplicated(ListOfCustomers), ]))
 ```
 
 ### Nombre de factures
 ```{r comment=NA}
-length(ListOfInvoices[!duplicated(ListOfInvoices), ])
+cat(length(ListOfInvoices[!duplicated(ListOfInvoices), ]))
 ```
 
 ## Facture annulées
 Nombre de produits annulés
 ```{r comment=NA}
-beforeCancelations - afterCancelations
+cat(beforeCancelations - afterCancelations)
 ```
 
 ## StockCode POST, D, ...

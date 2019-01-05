@@ -1,12 +1,3 @@
-#---------------------------------------------GITHUB----------------------------------------------------
-#Lors de changements
-#1. git add .
-#2. git commit -m "Le message a envoyer"
-#3. git push
-
-#Pour récupérer les changements
-#git pull
-
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 #Libraries to install
 pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
@@ -24,7 +15,6 @@ library(wordcloud)
 library(cluster)
 library(factoextra)
 library(NbClust)
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
 library(car)
 
 #General constants
@@ -36,14 +26,14 @@ onlineRetail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.name
 #Check if the data has been imported correctly
 #View(onlineRetail)
 
-#Match canceled orders and  corresponding orders
+#Group the number of products ordered by invoice number
 productsPerInvoice <- aggregate(onlineRetail$Quantity, by=list(category=onlineRetail$InvoiceNo), FUN=sum)
 
 #Explore the varibales
 #How many variables do we have?
 length(onlineRetail)
 
-#What are the different variables?
+#What are the names of the different variables? And which type of data do they have?
 str(onlineRetail)
 
 #Number of unique InvoiceNo (orders)
@@ -52,19 +42,15 @@ length(unique(onlineRetail$InvoiceNo))
 #Number of unique StockCode (different products)
 length(unique(onlineRetail$StockCode))
 
-#Number of unique Description (different products): Compare with the length of StockCode
+#Number of unique Description (different products): To compare with the length of StockCode
 length(unique(onlineRetail$Description))
 
 #Analysis of Quantity
 summary(onlineRetail$Quantity)
 
-#InvoiceData -> Select function has been taken from the library dplyr
-#Check when the records started and when it ended
+#Check when the records started and when it ended (Start date and End date)
 head(select(onlineRetail, InvoiceDate), 10)
 tail(select(onlineRetail, InvoiceDate), 10)
-
-#UnitPrice, not working?
-#summary(onlineRetail$UnitPrice)
 
 #CustomerID, show th enumber of unique Customers
 length(unique(onlineRetail$CustomerID))
