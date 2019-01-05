@@ -125,9 +125,10 @@ length(listOfCountry[!duplicated(listOfCountry), ])
 listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
 
-#5. Groupe the amount of purchases for each country
-purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
-names(purchasesPerCountry) <- c("Country","Quantity")
+#5. Group the amount of purchases for each country
+purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$Country), FUN=sum)
+names(purchasesPerCountry) <- c("Country","Sales Country")
+summary(purchasesPerCountry[2])
 
 #6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
@@ -161,15 +162,18 @@ pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries ou
 
 #BOXPLOTS
 #Sales per product
-salesPerProduct <- aggregate(onlineRetailUnique$Quantity, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
-names(salesPerProduct) <- c("StockCode","Quantity")
+salesPerProduct <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
+names(salesPerProduct) <- c("StockCode","Sales Product")
 View(salesPerProduct)
 
 #Boxplot of the sales per product
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
+summary(salesPerProduct[2])
 
-#Boxplot of the purchases
-boxplot(onlineRetailUnique, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+#Boxplot of the Quantity
+boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
+
+#---------------------------------------CODE À VERIFIER (contient des erreurs)-----------------------------------
 
 #GRAPHS
 #Invoices per month in 2011
@@ -228,35 +232,31 @@ SalesData <- onlineRetailUnique %>%
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
-#<<<<<<< HEAD
-# labs(x="Month", y="Turnover in million")
-#
-#=======
-#  labs(x="Month", y="Turnover in thousand")
-#>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
+
+#---------------------------------------FIN DE CODE À VERIFIER-----------------------------------
 
 #-------------------------------------------PCA-------------------------------------------
-#----A. ARANGE DATA SET----
-#length(unique(onlineRetailUnique$StockCode))
+#----PART 1: PREPARE DATASET FOR PCA----
 
-#Create a dataset per product (StockCode // sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
-#Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
+#Create a dataset per PRODUCT (StockCode // (a)sum of Quantity / (b)Turnover[Quantity*UnitPrice] / (c)Count of Customers / (d)AvgUnitPrice / (e)NbOfCountry )
+
+#(a)Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
 stockPerQuantity <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$StockCode), FUN=sum)
 names(stockPerQuantity) <- c("StockCode","Quantity")
 
-#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
+#(b)Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
 stockPerPurchases <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$StockCode), FUN=sum)
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
-#Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
+#(c)Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
 stockPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
-#Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
+#(d)Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
 stockPerUnitPrice <- aggregate(onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$StockCode), FUN=mean)
 names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 
-#Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
+#(e)Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
 stockPerCountry <- aggregate(onlineRetailUnique$Country, by=list(Category=onlineRetailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCountry) <- c("StockCode","NbOfCountry")
 
@@ -268,18 +268,20 @@ productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
 productData <- productData[2:6]
 
+#Merged dataset for our PCA of the Products
 View(productData)
 
-#Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
-#Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
+#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers)
+
+#(a) Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
 countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerStockCode) <- c("Country","NbOfProduct")
 
-#Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
+#(b) Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
 countryPerPurchases <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$Country), FUN=sum)
 names(countryPerPurchases) <- c("Country","Turnover")
 
-#Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
+#(c) Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
 countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
@@ -289,10 +291,13 @@ countryData <- merge(countryData, countryPerCustomers, by="Country")
 row.names(countryData) <- countryData$Country
 countryData <- countryData[2:4]
 
+#Merged dataset for our PCA of the Countries
 View(countryData)
 
-#----B. GET INTO PCA----
-#--------------------PCA FOR PRODUCT----------------
+#----PART 2: GET INTO PCA----
+
+#----PCA: PRODUCT----
+
 #Plot of a matrix of data
 pairs(productData)
 
@@ -346,7 +351,8 @@ score(pcaProductAde4, xax=2)
 # obtuse angle = negative.
 s.corcircle(pcaProductAde4$co)
 
-#--------------------PCA FOR COUNTRY----------------
+#----PCA:COUNTRY-----
+
 #Plot of a matrix of data
 pairs(countryData)
 
@@ -400,7 +406,7 @@ score(pcaCountryAde4, xax=2)
 # obtuse angle = negative.
 s.corcircle(pcaCountryAde4$co)
 
-#--------------------PCA FOR COUNTRY WITHOUT UK----------------
+#----PCA: COUNTRIES WITHOUT UK----
 #Same without UK
 #Remove UK from the dataset 
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
@@ -420,10 +426,10 @@ covarCountryWithoutUK<-cov(countryDataWithoutUK.CR)
 #summary of the componnent
 summary(pcaCountryWithoutUK)
 
-#visual of the summary
+#Visual of the summary
 plot(pcaCountryWithoutUK)
 
-#weight of the original variables in the component
+#Weight of the original variables in the component
 loadings(pcaCountryWithoutUK)
 
 #Final projection
@@ -434,12 +440,16 @@ pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TR
 
 #Print the proper values
 pcaCountryWithoutUK$eig
+
 #Cumulative variances
 cumsum(pcaCountryWithoutUK$eig)
+
 #The varaince in percentage
 pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100
+
 #The screeplot
 barplot(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
+
 #The cumulative percentages
 cumsum(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
 

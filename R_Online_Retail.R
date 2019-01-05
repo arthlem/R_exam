@@ -179,7 +179,7 @@ boxplot(Onlineretail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=
 #Invoices per month in 2011
 
 #Check format of dates
-OnlineretailClean$InvoiceDate <- mdy_hm(OnlineretailClean$InvoiceDate)
+OnlineRetailClean$InvoiceDate <- mdy_hm(OnlineRetailClean$InvoiceDate)
 
 #Creating object for date's year
 OnlineretailClean$InvoiceYear <- year(OnlineretailClean$InvoiceDate)
