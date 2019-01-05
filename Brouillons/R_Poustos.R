@@ -3,7 +3,7 @@
 pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
 install.packages(pkgs)
 
-#Libraries to load
+#Load the libraries we just downloaded, necessary for the script to work properly
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -62,26 +62,25 @@ onlineRetailClean <- subset(onlineRetail, CustomerID != "")
 #Counting the number variables that have been removed (missing CustomerID)
 dim(onlineRetail)-dim(onlineRetailClean)
 #Percentage of data removed:
-round((135080/541909)*100,digit=2)
+paste(round((135080/541909)*100,digit=2), "%", sep="")
 
-#Remove Invoices beggining with C
+#Remove canceled invoices: these invoices are beggining with C
+#Count number of records (canceled included)
 beforeCancelations <- nrow(onlineRetailClean)
 onlineRetailClean <- subset(onlineRetailClean, grepl("^(?!C).*$", onlineRetailClean$InvoiceNo, perl = TRUE))
+#Count number of records after having removed the canceled invoices
 afterCancelations <- nrow(onlineRetailClean)
+#Number of records removed
 beforeCancelations - afterCancelations
 
-#Finish cleaning dataset in one line 
-# DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
-# 
-# onlineRetailClean <- subset(onlineRetailClean, !(StockCode %in% DataToRemove))
-
+#Remove other records that aren't orders
 #Remove POSTAGE
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "POST")
 
 #Remove Discount
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "D")
 
-#Remove CARRIAGE
+#Remove C2
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "C2")
 
 #Remove Manual
@@ -90,10 +89,10 @@ onlineRetailClean <- subset(onlineRetailClean, StockCode != "M")
 #Remove Bank Charges
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "BANK CHARGES")
 
-#Remove PADS TO MATCH ALL CUSHIONS 
+#Remove PADS 
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "PADS")
 
-#Remove DOTCOM POSTAGE
+#Remove DOT
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "DOT")
 
 #Remove Unit Price <= 0
@@ -104,11 +103,10 @@ onlineRetailClean <- subset(onlineRetailClean, Quantity > 0)
 
 #Remove Duplicates
 onlineRetailUnique <- unique(onlineRetailClean)
+#Number of duplicate lines removed
 dim(onlineRetailClean)-dim(onlineRetailUnique)
 
-#Compute total revenue per row
-#setDT(onlineRetailClean)[, TotalPrice := as.numeric(as.character(UnitPrice))*Quantity]
-
+#We add a new column to compute the total price
 onlineRetailClean <- onlineRetailClean %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
@@ -127,24 +125,40 @@ length(listOfCountry[!duplicated(listOfCountry), ])
 listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
 
-#5. Amount of purchases for each country
+#5. Groupe the amount of purchases for each country
 purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
-#View(purchasesPerCountry)
-purchasesNotUk <- purchasesPerCountry[-36,]
+names(purchasesPerCountry) <- c("Country","Quantity")
 
-#PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
-slices <- purchasesPerCountry[[2]]
-lbls <- purchasesPerCountry[[1]]
-pie(slices, labels = lbls, main="Pie Chart of Countries without UK")
+#6. Create another variable to analyse the data out of the UK
+purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
-#Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries (!!)
+#PieChart with all countries
+purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
+slices2 <- c(purchaseUk[[2]],sum(purchasesNotUk[[2]]))
+lbls2 <- c("United Kingdom", "Others")
+pie(slices2, labels = lbls2, main="Pie Chart of Sales")
+
+#Piechart with sales out of the United Kingdom
 slicesNotUK <- purchasesNotUk[[2]]
 lblsNotUK <- purchasesNotUk[[1]]
-pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
+#Piechart with the countries with the most returns Out of the UK
+countriesTopSelling <- subset(purchasesNotUk, Quantity > 80000)
+names(countriesTopSelling) = c("Country", "Quantity")
+countriesLeastSelling <- subset(purchasesNotUk, Quantity <= 80000)
+otherCountries <- data.frame(Country="Others",Quantity=sum(countriesLeastSelling[[2]]))
 
-#Countries with the most returns
-returns <- subset(onlineRetailUnique,Quantity<0)
+countriesTopSelling <- rbind(countriesTopSelling,otherCountries)
+slicesTopSelling <- countriesTopSelling[[2]]
+lblsTopSelling <- countriesTopSelling[[1]]
+
+pctTopSelling <- round(slicesTopSelling/sum(slicesNotUK)*100)
+lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
+lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
+pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
+
+#Group the countries wirth the most returns
 countriesWithReturns <- aggregate(returns$Quantity, by=list(Category=returns$Country), FUN=sum)
 View(countriesWithReturns)
 
