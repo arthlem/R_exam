@@ -115,20 +115,20 @@ onlineRetailClean <- onlineRetailClean %>%
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
 #1. Number of invoices (orders)
-listOfInvoices <- onlineRetail["InvoiceNo"]
+listOfInvoices <- onlineRetailUnique["InvoiceNo"]
 length(listOfInvoices[!duplicated(listOfInvoices), ])
 #2. Number of products
-listOfProducts <- onlineRetail["StockCode"]
+listOfProducts <- onlineRetailUnique["StockCode"]
 length(listOfProducts[!duplicated(listOfProducts), ])
 #3. Number of Countries
-listOfCountry <- onlineRetail["Country"]
+listOfCountry <- onlineRetailUnique["Country"]
 length(listOfCountry[!duplicated(listOfCountry), ])
 #4. Number of Customers
-listOfCustomers <- onlineRetail["CustomerID"]
+listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
 
 #5. Amount of purchases for each country
-purchasesPerCountry <- aggregate(onlineRetail$Quantity, by=list(Category=onlineRetail$Country), FUN=sum)
+purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
 #View(purchasesPerCountry)
 purchasesNotUk <- purchasesPerCountry[-36,]
 
@@ -144,12 +144,12 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
 
 
 #Countries with the most returns
-returns <- subset(onlineRetail,Quantity<0)
+returns <- subset(onlineRetailUnique,Quantity<0)
 countriesWithReturns <- aggregate(returns$Quantity, by=list(Category=returns$Country), FUN=sum)
 View(countriesWithReturns)
 
 #Sales per product
-salesPerProduct <- aggregate(onlineRetail$Quantity, by=list(StockCode=onlineRetail$StockCode), FUN=sum)
+salesPerProduct <- aggregate(onlineRetailUnique$Quantity, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
 View(salesPerProduct)
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
 #TO DO: Show the most returned product (!!)
@@ -157,25 +157,25 @@ boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outlin
 #Analysis of the % of quantity returned in comparison with the number ordered
 ((-countriesWithReturns[29,2]) / purchasesPerCountry[36,2])*100
 
-boxplot(onlineRetail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+boxplot(onlineRetailUnique, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
 
 #Invoices per month in 2011
 
 #Check format of dates
-onlineRetailClean$InvoiceDate <- mdy_hm(onlineRetailClean$InvoiceDate)
+onlineRetailUnique$InvoiceDate <- mdy_hm(onlineRetailUnique$InvoiceDate)
 
 #Creating object for date's year
-onlineRetailClean$InvoiceYear <- year(onlineRetailClean$InvoiceDate)
+onlineRetailUnique$InvoiceYear <- year(onlineRetailUnique$InvoiceDate)
 #Creating object for date's month
-onlineRetailClean$InvoiceMonth <- month(onlineRetailClean$InvoiceDate,label=T)
+onlineRetailUnique$InvoiceMonth <- month(onlineRetailUnique$InvoiceDate,label=T)
 #Creating object for date's day
-onlineRetailClean$InvoiceWeekday <- wday(onlineRetailClean$InvoiceDate, label=T)
+onlineRetailClean$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=T)
 #Creating object for date's hour
-onlineRetailClean$InvoiceHour <- hour(onlineRetailClean$InvoiceDate)
-View(onlineRetailClean)
+onlineRetailClean$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
+View(onlineRetailUnique)
 #Number of invoices per month in 2011
 #Filter to select year 2011 and count invoices for each month
-monthData <- onlineRetailClean %>% 
+monthData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceMonth)
 
@@ -186,7 +186,7 @@ ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day
 
 #Number of invoices per day in 2011
 #Filter to select year 2011 and count invoices for each day of the week
-dayData <- onlineRetailClean %>% 
+dayData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceWeekday)
 
@@ -197,7 +197,7 @@ ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day
 
 #Number of invoices per hour in 2011
 #Filter to select year 2011 and count invoices for each hour of the day
-hourData <- onlineRetailClean %>% 
+hourData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceHour)
 
@@ -207,7 +207,7 @@ ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day
   labs(x="hour", y="Number of invoices")
 
 #Turnover per month in 2011
-SalesData <- onlineRetailClean %>%
+SalesData <- onlineRetailUnique %>%
   dplyr::filter(InvoiceYear == 2011) %>%
   group_by(InvoiceMonth) %>%
   summarise(CA = sum(TotalPrice))
