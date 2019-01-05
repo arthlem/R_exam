@@ -145,10 +145,14 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
 #Piechart with the countries with the most returns Out of the UK
 countriesTopSelling <- subset(purchasesNotUk, Quantity > 80000)
+names(countriesTopSelling) = c("Country", "Quantity")
 countriesLeastSelling <- subset(purchasesNotUk, Quantity <= 80000)
-slicesTopSelling <- c(countriesTopSelling[[2]], sum(countriesLeastSelling[[2]]))
-lblsTopSelling <- c(countriesTopSelling[[1]], "Others")
-View(lblsTopSelling)
+otherCountries <- data.frame(Country="Others",Quantity=sum(countriesLeastSelling[[2]]))
+
+countriesTopSelling <- rbind(countriesTopSelling,otherCountries)
+slicesTopSelling <- countriesTopSelling[[2]]
+lblsTopSelling <- countriesTopSelling[[1]]
+
 pctTopSelling <- round(slicesTopSelling/sum(slicesNotUK)*100)
 lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
 lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
