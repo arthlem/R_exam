@@ -372,40 +372,6 @@ summary(pcaCountry)
 #visual of the summary
 plot(pcaCountry)
 
-#weight of the original variables in the component
-loadings(pcaCountry)
-
-#Final projection
-biplot(pcaCountry)
-
-#Use the ade4 librarie for the acp
-pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
-
-#Print the proper values
-pcaCountryAde4$eig
-#Cumulative variances
-cumsum(pcaCountryAde4$eig)
-#The varaince in percentage
-pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
-#The screeplot:
-barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
-#The cumulative percentages
-cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
-
-#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
-inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
-
-#link betwen component and variables in graph
-score(pcaCountryAde4, xax=1)
-score(pcaCountryAde4, xax=2)
-
-#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
-#The angle between two arrows represents the correlation between them:
-# acute angle = positive;
-# right angle = zero;
-# obtuse angle = negative.
-s.corcircle(pcaCountryAde4$co)
-
 #----PCA: COUNTRIES WITHOUT UK----
 #Same without UK
 #Remove UK from the dataset 
@@ -428,44 +394,6 @@ summary(pcaCountryWithoutUK)
 
 #Visual of the summary
 plot(pcaCountryWithoutUK)
-
-#Weight of the original variables in the component
-loadings(pcaCountryWithoutUK)
-
-#Final projection
-biplot(pcaCountryWithoutUK)
-
-#Use the ade4 librarie for the acp
-pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TRUE, scale = TRUE)
-
-#Print the proper values
-pcaCountryWithoutUK$eig
-
-#Cumulative variances
-cumsum(pcaCountryWithoutUK$eig)
-
-#The varaince in percentage
-pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100
-
-#The screeplot
-barplot(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
-
-#The cumulative percentages
-cumsum(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
-
-#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
-inertia.dudi(pcaCountryWithoutUK,col.inertia = T)$col.abs
-
-#link betwen component and variables in graph
-score(pcaCountryWithoutUK, xax=1)
-score(pcaCountryWithoutUK, xax=2)
-
-#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
-#The angle between two arrows represents the correlation between them:
-# acute angle = positive;
-# right angle = zero;
-# obtuse angle = negative.
-s.corcircle(pcaCountryWithoutUK$co)
 
 #-------------------------PART 3: CLUSTERING-------------------------
 
