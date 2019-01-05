@@ -127,23 +127,34 @@ length(listOfCustomers[!duplicated(listOfCustomers), ])
 
 #5. Groupe the amount of purchases for each country
 purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
+names(purchasesPerCountry) <- c("Country","Quantity")
 
 #6. Create another variable to analyse the data out of the UK
-purchasesNotUk <- purchasesPerCountry[-36,]
+purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
-#PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
-slices <- purchasesPerCountry[[2]]
-lbls <- purchasesPerCountry[[1]]
-pie(slices, labels = lbls, main="Pie Chart of Sales")
+#PieChart with all countries
+purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
+slices2 <- c(purchaseUk[[2]],sum(purchasesNotUk[[2]]))
+lbls2 <- c("United Kingdom", "Others")
+pie(slices2, labels = lbls2, main="Pie Chart of Sales")
 
-#Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries (!!)
+#Piechart with sales out of the United Kingdom
 slicesNotUK <- purchasesNotUk[[2]]
 lblsNotUK <- purchasesNotUk[[1]]
-pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
+#Piechart with the countries with the most returns Out of the UK
+countriesTopSelling <- subset(purchasesNotUk, Quantity > 80000)
+countriesLeastSelling <- subset(purchasesNotUk, Quantity <= 80000)
+slicesTopSelling <- c(countriesTopSelling[[2]], sum(countriesLeastSelling[[2]]))
+lblsTopSelling <- c(countriesTopSelling[[1]], "Others")
+View(lblsTopSelling)
+pctTopSelling <- round(slicesTopSelling/sum(slicesNotUK)*100)
+lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
+lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
+pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
 
-#Countries with the most returns
-returns <- subset(onlineRetailUnique,Quantity<0)
+#Group the countries wirth the most returns
 countriesWithReturns <- aggregate(returns$Quantity, by=list(Category=returns$Country), FUN=sum)
 View(countriesWithReturns)
 
