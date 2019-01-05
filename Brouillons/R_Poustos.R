@@ -132,6 +132,7 @@ names(purchasesPerCountry) <- c("Country","Quantity")
 #6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
+#PIECHARTS
 #PieChart with all countries
 purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
 slices2 <- c(purchaseUk[[2]],sum(purchasesNotUk[[2]]))
@@ -158,21 +159,19 @@ lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
 lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
 pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
 
-#Group the countries wirth the most returns
-countriesWithReturns <- aggregate(returns$Quantity, by=list(Category=returns$Country), FUN=sum)
-View(countriesWithReturns)
-
+#BOXPLOTS
 #Sales per product
 salesPerProduct <- aggregate(onlineRetailUnique$Quantity, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
+names(salesPerProduct) <- c("StockCode","Quantity")
 View(salesPerProduct)
+
+#Boxplot of the sales per product
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
-#TO DO: Show the most returned product (!!)
 
-#Analysis of the % of quantity returned in comparison with the number ordered
-((-countriesWithReturns[29,2]) / purchasesPerCountry[36,2])*100
-
+#Boxplot of the purchases
 boxplot(onlineRetailUnique, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
 
+#GRAPHS
 #Invoices per month in 2011
 
 #Check format of dates
