@@ -3,7 +3,7 @@
 pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
 install.packages(pkgs)
 
-#Libraries to load
+#Load the libraries we just downloaded, necessary for the script to work properly
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -64,24 +64,23 @@ dim(onlineRetail)-dim(onlineRetailClean)
 #Percentage of data removed:
 paste(round((135080/541909)*100,digit=2), "%", sep="")
 
-#Remove Invoices beggining with C
+#Remove canceled invoices: these invoices are beggining with C
+#Count number of records (canceled included)
 beforeCancelations <- nrow(onlineRetailClean)
 onlineRetailClean <- subset(onlineRetailClean, grepl("^(?!C).*$", onlineRetailClean$InvoiceNo, perl = TRUE))
+#Count number of records after having removed the canceled invoices
 afterCancelations <- nrow(onlineRetailClean)
+#Number of records removed
 beforeCancelations - afterCancelations
 
-#Finish cleaning dataset in one line 
-# DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
-# 
-# onlineRetailClean <- subset(onlineRetailClean, !(StockCode %in% DataToRemove))
-
+#Remove other records that aren't orders
 #Remove POSTAGE
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "POST")
 
 #Remove Discount
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "D")
 
-#Remove CARRIAGE
+#Remove C2
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "C2")
 
 #Remove Manual
@@ -90,10 +89,10 @@ onlineRetailClean <- subset(onlineRetailClean, StockCode != "M")
 #Remove Bank Charges
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "BANK CHARGES")
 
-#Remove PADS TO MATCH ALL CUSHIONS 
+#Remove PADS 
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "PADS")
 
-#Remove DOTCOM POSTAGE
+#Remove DOT
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "DOT")
 
 #Remove Unit Price <= 0
@@ -104,11 +103,10 @@ onlineRetailClean <- subset(onlineRetailClean, Quantity > 0)
 
 #Remove Duplicates
 onlineRetailUnique <- unique(onlineRetailClean)
+#Number of duplicate lines removed
 dim(onlineRetailClean)-dim(onlineRetailUnique)
 
-#Compute total revenue per row
-#setDT(onlineRetailClean)[, TotalPrice := as.numeric(as.character(UnitPrice))*Quantity]
-
+#We add a new column to compute the total price
 onlineRetailClean <- onlineRetailClean %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
@@ -127,15 +125,16 @@ length(listOfCountry[!duplicated(listOfCountry), ])
 listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
 
-#5. Amount of purchases for each country
+#5. Groupe the amount of purchases for each country
 purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$Country), FUN=sum)
-#View(purchasesPerCountry)
+
+#6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[-36,]
 
 #PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
 slices <- purchasesPerCountry[[2]]
 lbls <- purchasesPerCountry[[1]]
-pie(slices, labels = lbls, main="Pie Chart of Countries without UK")
+pie(slices, labels = lbls, main="Pie Chart of Sales")
 
 #Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries (!!)
 slicesNotUK <- purchasesNotUk[[2]]
