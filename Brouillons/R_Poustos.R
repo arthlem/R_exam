@@ -26,9 +26,6 @@ onlineRetail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.name
 #Check if the data has been imported correctly
 #View(onlineRetail)
 
-#Group the number of products ordered by invoice number
-productsPerInvoice <- aggregate(onlineRetail$Quantity, by=list(category=onlineRetail$InvoiceNo), FUN=sum)
-
 #Explore the varibales
 #How many variables do we have?
 length(onlineRetail)
@@ -62,9 +59,9 @@ length(unique(onlineRetail$Country))
 #Removing the missing variables (CustomerID that are empty)
 onlineRetailClean <- subset(onlineRetail, CustomerID != "")
 
-#Counting the number of removed variables (missing CustomerID)
+#Counting the number variables that have been removed (missing CustomerID)
 dim(onlineRetail)-dim(onlineRetailClean)
-#Percentage of empty data
+#Percentage of data removed:
 round((135080/541909)*100,digit=2)
 
 #Remove Invoices beggining with C
