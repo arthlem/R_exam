@@ -32,25 +32,45 @@ load("data.RData")
 ```
 
 ## Plan
-1. Introduction
-2. Exploration du Dataset
+1. Analyse des données importées
+2. Nettoyage des données
 3. Statistiques descriptives
 4. Analyse des composantes principales (ACP)
 5. Clustering
 6. Bonus
 
-## 1. Introduction: Les données
-- <b>Description:</b>
+## 1. Analyse des données importées
+
+### Qui?
 <br>Le dataset contient toutes les ventes émises par un magasin en ligne basé en Angleterre. Le magasin vend des cadeaux uniques pour toutes les occasions.
 
+### Quoi?
+- <b>Nombre de variables</b>
+```{r comment=NA}
+length(onlineRetail)
+```
+- <b>Nom des variables:</b>
+```{r comment=NA}
+colnames(onlineRetail)
+```
+
+### Où, Source?
+
+### Quand?
 - <b>Début:</b>
 ```{r comment=NA}
-head(select(Onlineretail, InvoiceDate), 1)
+head(select(onlineRetail, InvoiceDate), 1)
 ```
 - <b>Fin:</b>
 ```{r comment=NA}
-tail(select(Onlineretail, InvoiceDate), 1)
+tail(select(onlineRetail, InvoiceDate), 1)
 ```
+
+### Combien?
+```{r}
+dim(onlineRetail)
+```
+
 
 ## 2. Exploration des données dans le Dataset 
 ## Les variables (1/2)

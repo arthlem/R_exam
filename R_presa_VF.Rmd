@@ -1,0 +1,289 @@
+---
+title: "Présentation R: Online Retail"
+author: "Arthur Lemoine, François Somville, Alexandre Antippas"
+date: "Janvier 2019"
+output:
+  ioslides_presentation
+fontsize: 11pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+chooseCRANmirror(graphics=FALSE, ind=1)
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust","gridExtra")
+#install.packages(pkgs)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(lubridate)
+library(ade4)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(cluster)
+library(factoextra)
+library(NbClust)
+library(gridExtra)
+```
+
+```{r load myData, include=FALSE}
+load("data.RData")
+```
+
+## Plan
+1. Analyse des données importées
+2. Nettoyage des données
+3. Statistiques descriptives
+4. Analyse des composantes principales (ACP)
+5. Clustering
+6. Bonus
+
+## 1. Analyse des données importées
+
+### a. Qui?
+Le dataset contient toutes les ventes émises par un magasin en ligne basé en Angleterre. Le magasin vend des cadeaux uniques pour toutes les occasions.
+
+### b. Quoi?
+<font size="4"> 
+1. <b>InvoiceNo:</b> Contient le numéro de la facture <br>
+2. <b>StockCode:</b> Numéro d'identification du produit (C indique une annulation)<br>
+3. <b>Description:</b> Description du produit<br>
+4. <b>Quantity:</b> Quanitités de pièces commandé<br>
+5. <b>InvoiceDate:</b> Date de la facture avec l'heure<br>
+6. <b>UnitPrice:</b> Prix de l'unité en livre sterling<br>
+7. <b>CustomerID:</b> ID du client (NA lors de modification de stock)<br>
+8. <b>Country:</b> Pays destinataire<br> </font size>
+
+## 1. Analyse des données importées
+### c. Où, Source?
+
+### d. Quand?
+```{r comment=NA}
+cat("Du",as.character(head(select(onlineRetail, InvoiceDate), 1)[[1]]), "au", as.character(tail(select(onlineRetail, InvoiceDate), 1)[[1]]))
+```
+
+### e. Combien?
+```{r comment=NA}
+cat(nrow(onlineRetail), "dans le dataset")
+```
+
+## 2. Nettoyage des données
+### a. Données non pertinentes
+<font size="4"> 
+1. <b>C:</b> Annulation<br>
+2. <b>C2:</b> Transport<br>
+3. <b>D:</b> Réductions<br>
+4. <b>POST:</b> Frais postaux<br>
+5. <b>M:</b> Ajout manuel<br>
+6. <b>BANK CHARGES:</b> Frais bancaire<br>
+7. <b>PADS:</b> Pas de rapport avec les produits<br>
+8. <b>DOT:</b> DOTCOM POSTAGE<br> 
+9. <b>UnitPrice < 0</b><br> 
+10. <b>Quantity < 0</b><br> 
+</font size>
+
+## 2. Nettoyage de données
+###	b. Nombre de lignes Nettoyées
+```{r comment=NA}
+cat(nrow(onlineRetail),"lignes à la base")
+cat(nrow(onlineRetailClean), "lignes après nettoyage")
+cat(nrow(onlineRetailUnique), "lignes après nettoyage et unique")
+cat("Pourcentage retiré :", 100 - (nrow(onlineRetailUnique)/nrow(onlineRetail)*100), "%")
+```
+
+## 3. Statistiques descriptives
+### a. Analyse générale
+```{r comment=NA}
+cat("i. Nombre de pays:",length(unique(onlineRetailUnique$Country)), "(Attention 37 + undefined)")
+cat("ii. Nombre de factures (uniques):",length(unique(onlineRetailUnique$InvoiceNo)))
+cat("iii. Nombre de clients (uniques):",length(unique(onlineRetailUnique$CustomerID)))
+cat("iv. Nombre de produits (uniques):",length(unique(onlineRetailUnique$StockCode)))
+
+
+cat("Summary des quantités par facture","\n")
+summary(onlineRetailUnique$Quantity)
+```
+
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r comment=NA}
+pie(slices2, labels = lbls2, main="Pie Chart of Sales")
+```
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r comment=NA}
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
+```
+
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r comment=NA}
+pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
+```
+
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### i.	Summary 
+
+TODO !!!!!!!! (Update data.RData)
+```{r comment=NA}
+#summary(invoiceData[2])
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### i.	Summary 
+```{r comment=NA}
+summary(salesPerProduct[2])
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### ii.	Boxplot des ventes
+```{r comment=NA}
+boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### ii.	Boxplot des ventes
+```{r comment=NA}
+boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### iii.	Factures par mois en 2011
+```{r comment=NA}
+ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Month", y="Number of invoices")
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### iv.	Factures par jour en 2011
+```{r comment=NA}
+ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Week", y="Number of invoices")
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### v.	Factures par heure du jour en 2011
+```{r comment=NA}
+ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="hour", y="Number of invoices")
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### vi.	Chiffre d'affaire par mois
+```{r comment=NA}
+ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
+```
+
+
+## 4. PCA
+### a. DataSet par pays
+```{r comment=NA}
+pairs(countryData)
+```
+
+## 4. PCA
+### a. DataSet par pays
+#### i. Plot du pca par pays => non pertinent
+```{r comment=NA}
+plot(pcaCountry)
+```
+
+## 4. PCA
+### a. DataSet par pays
+#### i. Plot du pca par pays (sans UK) => non pertinent
+```{r comment=NA}
+plot(pcaCountryWithoutUK)
+```
+
+## 4. PCA
+### b. DataSet par produit
+```{r comment=NA}
+pairs(productData)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### i. Matrice des corrélations
+```{r comment=NA}
+cor(productData)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### ii. Sommaire des composants
+```{r comment=NA}
+summary(pcaProduct)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### iii. Plot du pca
+```{r comment=NA}
+plot(pcaProduct)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### iv. Poids des variables originales dans les composants
+```{r comment=NA}
+loadings(pcaProduct)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### v. Lien entre les composantes et les variables (xax=1)
+```{r comment=NA}
+score(pcaProductAde4, xax=1)
+```
+
+
+## 4. PCA
+### b. DataSet par produit
+#### v. Lien entre les composantes et les variables (xax=2)
+```{r comment=NA}
+score(pcaProductAde4, xax=2)
+```
+
+## 4. PCA
+### b. DataSet par produit
+#### vi. Cercle de corrélation
+```{r comment=NA}
+s.corcircle(pcaProductAde4$co)
+```
+
+
+
+## 5. Clustering
+```{r comment=NA}
+cat("TODO")
+```
+
+
+## 6. Bonus
+```{r fig.align="center"}
+set.seed(4363)
+
+wordcloud(names(freq),freq, scale=c(3.5,0.5), max.words=85, min.freq=30, random.order=FALSE, rot.per=0.40, use.r.layout=FALSE, random.color=TRUE, colors=brewer.pal(6,"Dark2"))
+```
+
