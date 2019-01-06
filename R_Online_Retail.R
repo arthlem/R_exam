@@ -204,7 +204,7 @@ onlineRetailUnique$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=
 #Creating object for date's hour
 onlineRetailUnique$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
 
-#Number of invoices per month in 2011
+#Graph of the number of invoices per MONTH in 2011
 #Filter to select year 2011 and count invoices for each month
 monthData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
@@ -215,7 +215,7 @@ ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
   labs(x="Month", y="Number of invoices")
 
-#Number of invoices per day in 2011
+#Graph of the number of invoices per DAY in 2011
 #Filter to select year 2011 and count invoices for each day of the week
 dayData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
@@ -226,7 +226,7 @@ ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
   labs(x="Week", y="Number of invoices")
 
-#Number of invoices per hour in 2011
+#Graph of the number of invoices per HOUR in 2011
 #Filter to select year 2011 and count invoices for each hour of the day
 hourData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
@@ -237,7 +237,7 @@ ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
   labs(x="hour", y="Number of invoices")
 
-#Turnover per month in 2011
+#Graph of the turnover per MONTH in 2011
 SalesData <- onlineRetailUnique %>%
   dplyr::filter(InvoiceYear == 2011) %>%
   group_by(InvoiceMonth) %>%
@@ -247,9 +247,9 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
 
-#-------------------------------------------PCA-------------------------------------------
-#----PART 1: PREPARE DATASET FOR PCA----
+#----D.PCA----
 
+#PART 1: PREPARE DATASET FOR PCA
 #Create a dataset per PRODUCT (StockCode // (a)sum of Quantity / (b)Turnover[Quantity*UnitPrice] / (c)Count of Customers / (d)AvgUnitPrice / (e)NbOfCountry )
 
 #(a)Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
@@ -272,7 +272,7 @@ names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 stockPerCountry <- aggregate(onlineRetailUnique$Country, by=list(Category=onlineRetailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCountry) <- c("StockCode","NbOfCountry")
 
-#Merge the dataset to make productData
+#(a)+(b)+(c)+(d)+(e): Merge the dataset to make productData
 productData <- merge(stockPerQuantity, stockPerPurchases, by="StockCode")
 productData <- merge(productData, stockPerCustomers, by="StockCode")
 productData <- merge(productData, stockPerUnitPrice, by="StockCode")
@@ -280,10 +280,10 @@ productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
 productData <- productData[2:6]
 
-#Merged dataset for our PCA of the Products
+#Verify that data has been merged correctly
 View(productData)
 
-#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers)
+#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers /(d)NbOfInvoices)
 
 #(a) Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
 countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=function(x) length(unique(x)))
@@ -301,24 +301,24 @@ names(countryPerCustomers) <- c("Country","NbOfCustomers")
 countryPerInvoice <- aggregate(onlineRetailUnique$InvoiceNo, by=list(Category=onlineRetailUnique$Country), FUN=function(x) length(unique(x)))
 names(countryPerInvoice) <- c("Country","NbOfInvoice")
 
-#Merge the dataset to make countryData
+#(a)+(b)+(c)+(d): Merge the dataset to make countryData
 countryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
 countryData <- merge(countryData, countryPerCustomers, by="Country")
 countryData <- merge(countryData, countryPerInvoice, by="Country")
 row.names(countryData) <- countryData$Country
 countryData <- countryData[2:5]
 
-#Merged dataset for our PCA of the Countries
+#Verify that data has been merged correctly
 View(countryData)
 
-#----PART 2: GET INTO PCA----
+#PART 2: GET INTO PCA
 
-#----PCA: PRODUCT----
+#PCA: PRODUCT
 
 #Plot of a matrix of data
 pairs(productData)
 
-#Returns the matrix of correlations (purement informatif)
+#Returns the matrix of correlations
 cor(productData)
 
 #Center and scale data
@@ -340,7 +340,7 @@ loadings(pcaProduct)
 #Final projection
 biplot(pcaProduct)
 
-#Use the ade4 librarie for the acp
+#Let's use the ade4 library to compute the ACP
 pcaProductAde4<-dudi.pca(productData, scannf=FALSE,center = TRUE, scale = TRUE)
 
 #Print the proper values
@@ -354,10 +354,10 @@ barplot(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
 #The cumulative percentages
 cumsum(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
 
-#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+#Decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
 inertia.dudi(pcaProductAde4,col.inertia = T)$col.abs
 
-#link betwen component and variables in graph
+#Link betwen component and variables in graph
 score(pcaProductAde4, xax=1)
 score(pcaProductAde4, xax=2)
 
@@ -373,12 +373,12 @@ scatter(pcaProductAde4, posieig="none")
 #Data projection with the new axis (but with dot)
 scatter(pcaProductAde4, posieig="none", clab.row=0)
 
-#----PCA:COUNTRY-----
+#PCA:COUNTRY
 
-#Plot of a matrix of data
+#Plot matrix of data
 pairs(countryData)
 
-#Returns the matrix of correlations (purement informatif)
+#Returns the matrix of correlations
 cor(countryData)
 
 #Center and scale data
@@ -388,19 +388,19 @@ pcaCountry <- princomp(countryData.CR)
 
 #Variance-covariance of scaled and centered variables
 covarCountry<-cov(countryData.CR)
-#summary of the componnent
+#Summary of the componnent
 summary(pcaCountry)
 
-#visual of the summary
+#Visual of the summary
 plot(pcaCountry)
 
-#weight of the original variables in the component
+#Weight of the original variables in the component
 loadings(pcaCountry)
 
 #Final projection
 biplot(pcaCountry)
 
-#Use the ade4 librarie for the acp
+#let's use the ade4 library to compute the ACP
 pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
 
 #Print the proper values
@@ -414,10 +414,10 @@ barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
 #The cumulative percentages
 cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
 
-#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+#Decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
 inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
 
-#link betwen component and variables in graph
+#Link betwen component and variables in graph
 score(pcaCountryAde4, xax=1)
 score(pcaCountryAde4, xax=2)
 
@@ -433,14 +433,14 @@ scatter(pcaCountryAde4, posieig="none")
 #Data projection with the new axis (but with dot)
 scatter(pcaCountryAde4, posieig="none", clab.row=0)
 
-#----PCA: COUNTRIES WITHOUT UK----
+#PCA: COUNTRIES WITHOUT UK
 #Same without UK
 #Remove UK from the dataset 
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
 #Plot of a matrix of data
 pairs(countryDataWithoutUK)
 
-#Returns the matrix of correlations (purement informatif)
+#Returns the matrix of correlations
 cor(countryDataWithoutUK)
 
 #Center and scale data
@@ -462,7 +462,7 @@ loadings(pcaCountryWithoutUK)
 #Final projection
 biplot(pcaCountryWithoutUK)
 
-#Use the ade4 librarie for the acp
+#Let's use the ade4 library to compute the ACP
 pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TRUE, scale = TRUE)
 
 #Print the proper values
@@ -476,7 +476,7 @@ barplot(pcaCountryWithoutUKAde4$eig/sum(pcaCountryWithoutUKAde4$eig)*100)
 #The cumulative percentages
 cumsum(pcaCountryWithoutUKAde4$eig/sum(pcaCountryWithoutUKAde4$eig)*100)
 
-#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+#Decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
 inertia.dudi(pcaCountryWithoutUKAde4,col.inertia = T)$col.abs
 
 #link betwen component and variables in graph
@@ -495,37 +495,36 @@ scatter(pcaCountryWithoutUKAde4, posieig="none")
 #Data projection with the new axis (but with dot)
 scatter(pcaCountryWithoutUKAde4, posieig="none", clab.row=0)
 
-#-------------------------PART 3: CLUSTERING-------------------------
-#----CLUSTERING: CountryData----
+#-------------------------E.CLUSTERING-------------------------
+#CLUSTERING on countryData
 
-#-----COMPUTE THE NUMBER OF CLUSTERS-----
+#countryData:COMPUTE THE NUMBER OF CLUSTERS
+
 #Prepare the data
 countriesClustering <- countryDataWithoutUK
-
-countriesClustering.R <- as.matrix(scale(countriesClustering))
 
 #Elbow Method for finding the optimal number of clusters
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
 
 k.max <- 15
-data <- countriesClustering.R
 
-wss <- sapply(1:k.max, 
-              function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
-wss
+wssCountries <- sapply(1:k.max, 
+              function(k){kmeans(countryDataWithoutUK.CR, k, nstart=50,iter.max = 15 )$tot.withinss})
+wssCountries
 plot(1:k.max, wss,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
+#Thanks to the elbow method, we find the optimal number of clusters at 5 which means k = 4
 abline(v = 4, lty =2)
 
-#-----COMPUTE THE CLUSTERS-----
+#countryData: COMPUTE THE CLUSTERS
 
-#Je calcule mon ACP pour l'introduire dans mon dataset qui est centré
+#Compute PCA
 countriesClustering.PCA <- dudi.pca(countriesClustering, scannf = FALSE, nf = 4, center = TRUE, scale = TRUE)
 
-#J'introduis mon ACP dans le DataSet
+#Bind PCA in the DataSet
 countriesClusteringWithPCA <- cbind(countriesClustering, countriesClustering.PCA$li)
 
 #Compute the kmeans
@@ -549,21 +548,20 @@ aggregate(countriesClustering[,1:4], list(countriesClustering.km$cluster), mean)
 plot(countriesClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(countriesClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(countriesClustering), col=countriesClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 
-#----CLUSTERING: ProductData----
+#CLUSTERING on ProductData
 
-#Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
 
+#productData:COMPUTE THE NUMBER OF CLUSTERS
+
 #ELBOW METHOD
-#Centering the data
-productClustering.R <- as.matrix(scale(productClustering))
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
-k.max <- 15
-wss <- sapply(1:k.max, 
-              function(k){kmeans(productClustering.R, k, nstart=50,iter.max = 15 )$tot.withinss})
-wss
-plot(1:k.max, wss,
+k.max2 <- 10
+wssProducts <- sapply(1:k.max2, 
+              function(k){kmeans(productData.CR, k, nstart=50,iter.max = 15 )$tot.withinss})
+wssProducts
+plot(1:k.max2, wssProducts,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
@@ -578,7 +576,7 @@ productClustering.PCA <- dudi.pca(productClustering, scannf = FALSE, nf = 5, cen
 
 
 #Bind the PCA in the DataSet
-productClusteringWithPCA <- cbind(productClustering.R, productClustering.PCA$li)
+productClusteringWithPCA <- cbind(productData.CR, productClustering.PCA$li)
 
 #Compute the kmeans (with scaled data)
 productClustering.km <- kmeans(productClusteringWithPCA[,1:5], centers = 5, iter.max = 10, nstart = 10)
