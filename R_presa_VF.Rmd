@@ -279,7 +279,7 @@ s.corcircle(pcaProductAde4$co)
 
 ## 5. Clustering
 ```{r comment=NA}
-cat("TODO")
+
 ```
 
 
