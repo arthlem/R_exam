@@ -516,13 +516,13 @@ abline(v = 3, lty =2)
 clusteringCountries2 <- countryDataWithoutUK
 
 #Je calcule mon ACP pour l'introduire dans mon dataset qui est centré
-clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 3, center = TRUE, scale = TRUE)
+clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 4, center = TRUE, scale = TRUE)
 
 #J'introduis mon ACP dans le DataSet
 clusteringCountries2 <- cbind(clusteringCountries2, clusteringCountries2.PCA$li)
 
 #Compute the kmeans
-clusteringCountries2.km <- kmeans(clusteringCountries2[,1:3], centers = 3, iter.max = 10, nstart = 10)
+clusteringCountries2.km <- kmeans(scale(clusteringCountries2[,1:4]), centers = 3, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
 table(clusteringCountries2.km$cluster)
@@ -531,12 +531,12 @@ table(clusteringCountries2.km$cluster)
 clusteringCountries2.km$centers
 
 #Show the different clusters
-pairs(clusteringCountries2[,1:3],col=clusteringCountries2.km$cluster)
+pairs(clusteringCountries2[,1:4],col=clusteringCountries2.km$cluster)
 
 #Create a scatterplotmatrix
-scatterplotMatrix(clusteringCountries2[,1:3],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountries2[,1:4],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
 
-aggregate(clusteringCountries2[,1:3], list(clusteringCountries2.km$cluster), mean)
+aggregate(clusteringCountries2[,1:4], list(clusteringCountries2.km$cluster), mean)
 
 #Final Result
 plot(clusteringCountries2[,c("Axis1","Axis2")], col="white", main="K-means")
