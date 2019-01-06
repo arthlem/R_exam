@@ -281,7 +281,7 @@ productData <- productData[2:6]
 #Merged dataset for our PCA of the Products
 View(productData)
 
-#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers)
+#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers / (d)NbOfInvoice)
 
 #(a) Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
 countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=length)
@@ -295,11 +295,16 @@ names(countryPerPurchases) <- c("Country","Turnover")
 countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
+#(d) Create a dataset with aggregate() by combining the Country with the nbOfInvoice and then change the variables names with names()
+countryPerInvoice <- aggregate(onlineRetailUnique$InvoiceNo, by=list(Category=onlineRetailUnique$Country), FUN=length)
+names(countryPerInvoice) <- c("Country","NbOfInvoice")
+
 #Merge the dataset to make countryData
 countryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
 countryData <- merge(countryData, countryPerCustomers, by="Country")
+countryData <- merge(countryData, countryPerInvoice, by="Country")
 row.names(countryData) <- countryData$Country
-countryData <- countryData[2:4]
+countryData <- countryData[2:5]
 
 #Merged dataset for our PCA of the Countries
 View(countryData)
@@ -387,6 +392,42 @@ summary(pcaCountry)
 #visual of the summary
 plot(pcaCountry)
 
+#Final projection
+biplot(pcaCountry)
+
+#Use the ade4 librarie for the acp
+pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
+
+#Print the proper values
+pcaCountryAde4$eig
+#Cumulative variances
+cumsum(pcaCountryAde4$eig)
+#The varaince in percentage
+pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
+#The screeplot
+barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+#The cumulative percentages
+cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+
+#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
+
+#link betwen component and variables in graph
+score(pcaCountryAde4, xax=1)
+score(pcaCountryAde4, xax=2)
+
+#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
+#The angle between two arrows represents the correlation between them:
+# acute angle = positive;
+# right angle = zero;
+# obtuse angle = negative.
+s.corcircle(pcaCountryAde4$co)
+
+#Data projection with the new axis
+scatter(pcaCountryAde4, posieig="none")
+#Data projection with the new axis (but with dot)
+scatter(pcaCountryAde4, posieig="none", clab.row=0)
+
 #----PCA: COUNTRIES WITHOUT UK----
 #Same without UK
 #Remove UK from the dataset 
@@ -430,17 +471,17 @@ fviz_nbclust(productClustering.R, kmeans, method = "silhouette")+
   labs(subtitle = "Silhouette method")
 
 
-pca4<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
+pca4<-dudi.pca(productClustering, scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
 productClustering<-cbind(productClustering,pca4$li)
 
-km1 <- kmeans(productClustering[,1:4], centers = 3, iter.max = 10, nstart = 10)
+km1 <- kmeans(productClustering, centers = 3, iter.max = 10, nstart = 10)
 table(km1$cluster)
 km1$centers
 
 #Plot the clusters
-pairs(productClustering[,1:4],col=km1$cluster)
+pairs(productClustering,col=km1$cluster)
 
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
+scatterplotMatrix(productClustering,smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
 plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
@@ -471,70 +512,70 @@ text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering),
 #----------CLUSTERING CountryData------------
 
 #Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
+install.packages("RcmdrMisc")# Uncomment if necessary
+library(RcmdrMisc)
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
-clusteringCountries <- countryDataWithoutUK
+clusteringCountry <- countryDataWithoutUK
 
 #Scale clusterCountries
-clusteringCountries.R <- scale(clusteringCountries)
+clusteringCountry.R <- scale(clusteringCountry)
 
 # Elbow method
-fviz_nbclust(clusteringCountries.R, kmeans, method = "wss") +
+fviz_nbclust(clusteringCountry.R, kmeans, method = "wss") +
   geom_vline(xintercept = 2, linetype = 2)+
   labs(subtitle = "Elbow method")
 
 # Silhouette method
-fviz_nbclust(clusteringCountries.R, kmeans, method = "silhouette")+
+fviz_nbclust(clusteringCountry.R, kmeans, method = "silhouette")+
   labs(subtitle = "Silhouette method")
 
-pca5<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-clusteringCountries<-cbind(clusteringCountries,pca5$li)
+pca5<-dudi.pca(clusteringCountry, scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
+clusteringCountry<-cbind(clusteringCountry,pca5$li)
 
-km3 <- kmeans(clusteringCountries[,1:3], centers = 3, iter.max = 10, nstart = 10)
+km3 <- kmeans(clusteringCountry, centers = 3, iter.max = 10, nstart = 10)
 table(km3$cluster)
 km3$centers
 
 #Plot the clusters
-pairs(clusteringCountries[,1:3],col=km3$cluster)
+pairs(clusteringCountry,col=km3$cluster)
 
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km3$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountry,smooth=FALSE,groups=km3$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
+plot(clusteringCountry[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
 
 # Same algorithm, but on scaled data.
-km4 <- kmeans(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
+km4 <- kmeans(scale(clusteringCountry,center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
 # Size of the clusters
 table(km4$cluster)
 # Clusters Centers (with no direct meaning!)
 km4$centers
 # Cluster center on initial variables
-aggregate(clusteringCountries[,1:3], list(km4$cluster), mean)
+aggregate(clusteringCountry[,1:3], list(km4$cluster), mean)
 
 # Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=TRUE)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=FALSE)
-cor(clusteringCountries[,1:3])
+plot(clusteringCountry[,c("Axis1","Axis2")], col=km4$cluster)
+scatterplotMatrix(clusteringCountry[,1:4],smooth=FALSE,groups=km4$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountry[,1:4],smooth=FALSE,groups=km4$cluster, by.groups=FALSE)
+cor(clusteringCountry[,1:4])
 
 # Comparison of the two results
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster, main="K-means on scaled data")
+plot(clusteringCountry[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
+plot(clusteringCountry[,c("Axis1","Axis2")], col=km4$cluster, main="K-means on scaled data")
 
 # Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(productData), col=km4$cluster, main="K-means on scaled data", cex=0.50)
+plot(clusteringCountry[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
+text(clusteringCountry[,c("Axis1","Axis2")], labels=rownames(countryData), col=km4$cluster, main="K-means on scaled data", cex=0.50)
 
 #HIERARCHICAL CLUSTERING -> Mieux pour les countries
 
 # Computing the distance matrix
 #mydata.dist<- dist(mydata[,1:4]) # not so good
-clusteringCountries.dist<- dist(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE)) # Better
+clusteringCountry.dist<- dist(scale(clusteringCountry[,1:4],center = TRUE,scale=TRUE)) # Better
 
 #Hclust with average link
-HClust.1 <- hclust(clusteringCountries.dist, method="average")
+HClust.1 <- hclust(clusteringCountry.dist, method="average")
 plot(HClust.1, main= "Cluster Dendrogram for Solution HClust.1", xlab=
        "Observation Number in Data Set", sub="Method=average; Distance=euclidian")
 # Cutting the tree to obtain 2 clusters
@@ -542,11 +583,11 @@ hc.1<-cutree(HClust.1, k=2)
 # Size of the clusters
 table(hc.1)
 
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.1, main="Clusters with average link." )
+plot(clusteringCountry[,c("Axis1","Axis2")], col=hc.1, main="Clusters with average link." )
 
 # Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.1, main="K-means on scaled data", cex=0.7)
+plot(clusteringCountry[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
+text(clusteringCountry[,c("Axis1","Axis2")], labels=rownames(clusteringCountry), col=hc.1, main="K-means on scaled data", cex=0.7)
 
 scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.1, by.groups=TRUE)
 
