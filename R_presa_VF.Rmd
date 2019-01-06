@@ -57,6 +57,10 @@ Le dataset contient toutes les ventes émises par un magasin en ligne basé en A
 
 ## 1. Analyse des données importées
 ### c. Où, Source?
+```{r comment=NA}
+cat("Source: https://archive.ics.uci.edu/ml/datasets/Online+Retail")
+```
+
 
 ### d. Quand?
 ```{r comment=NA}
@@ -81,6 +85,7 @@ cat(nrow(onlineRetail), "dans le dataset")
 8. <b>DOT:</b> DOTCOM POSTAGE<br> 
 9. <b>UnitPrice < 0</b><br> 
 10. <b>Quantity < 0</b><br> 
+11. <b>CustomerID = NA</b>
 </font size>
 
 ## 2. Nettoyage de données
@@ -129,10 +134,8 @@ pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries ou
 ## 3. Statistiques descriptives
 ### c. Analyse des ventes
 #### i.	Summary 
-
-TODO !!!!!!!! (Update data.RData)
 ```{r comment=NA}
-#summary(invoiceData[2])
+summary(invoiceData[2])
 ```
 
 ## 3. Statistiques descriptives
