@@ -1,18 +1,9 @@
-#---------------------------------------------GITHUB----------------------------------------------------
-#Lors de changements
-#1. git add .
-#2. git commit -m "Le message a envoyer"
-#3. git push
-
-#Pour récupérer les changements
-#git pull
-
 #-------------------------------------------ONLINE RETAIL CSV-------------------------------------------------
 #Libraries to install
-pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust")
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust","RcmdrMisc")
 install.packages(pkgs)
 
-#Libraries to load
+#Load the libraries we just downloaded, necessary for the script to work properly
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -24,175 +15,185 @@ library(wordcloud)
 library(cluster)
 library(factoextra)
 library(NbClust)
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
 library(car)
+library(RcmdrMisc)
 
 #General constants
 turnoverByMonthScale <- 1/1000
 
 #----A. IMPORT THE DATA----
-Onlineretail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL, fileEncoding = "UTF-8-BOM") #Load CSV File
+onlineRetail <- read.csv2(file.choose(), header=TRUE, sep=";", dec=",", row.names = NULL, fileEncoding = "UTF-8-BOM") #Load CSV File
 
 #Check if the data has been imported correctly
-#View(Onlineretail)
-
-#Match canceled orders and  corresponding orders
-ProductsPerInvoice <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$InvoiceNo), FUN=sum)
+#View(onlineRetail)
 
 #Explore the varibales
 #How many variables do we have?
-length(Onlineretail)
+length(onlineRetail)
 
-#What are the different variables?
-str(Onlineretail)
+#What are the names of the different variables? And which type of data do they have?
+str(onlineRetail)
 
 #Number of unique InvoiceNo (orders)
-length(unique(Onlineretail$InvoiceNo))
+length(unique(onlineRetail$InvoiceNo))
 
 #Number of unique StockCode (different products)
-length(unique(Onlineretail$StockCode))
+length(unique(onlineRetail$StockCode))
 
-#Number of unique Description (different products): Compare with the length of StockCode
-length(unique(Onlineretail$Description))
+#Number of unique Description (different products): To compare with the length of StockCode
+length(unique(onlineRetail$Description))
 
 #Analysis of Quantity
-summary(Onlineretail$Quantity)
+summary(onlineRetail$Quantity)
 
-#InvoiceData -> Select function has been taken from the library dplyr
-#Check when the records started and when it ended
-head(select(Onlineretail, InvoiceDate), 10)
-tail(select(Onlineretail, InvoiceDate), 10)
-
-#UnitPrice, not working?
-#summary(Onlineretail$UnitPrice)
+#Check when the records started and when it ended (Start date and End date)
+head(select(onlineRetail, InvoiceDate), 10)
+tail(select(onlineRetail, InvoiceDate), 10)
 
 #CustomerID, show th enumber of unique Customers
-length(unique(Onlineretail$CustomerID))
+length(unique(onlineRetail$CustomerID))
 
 #Country, show the number of unique countries
-length(unique(Onlineretail$Country))
+length(unique(onlineRetail$Country))
 
 #----B. DATA CLEANING----
 #Removing the missing variables (CustomerID that are empty)
-OnlineretailClean <- subset(Onlineretail, CustomerID != "")
+onlineRetailClean <- subset(onlineRetail, CustomerID != "")
 
-#Counting the number of removed variables (missing CustomerID)
-dim(Onlineretail)-dim(OnlineretailClean)
-#Percentage of empty data
-round((135080/541909)*100,digit=2)
+#Counting the number variables that have been removed (missing CustomerID)
+dim(onlineRetail)-dim(onlineRetailClean)
+#Percentage of data removed:
+paste(round((135080/541909)*100,digit=2), "%", sep="")
 
-#Remove Invoices beggining with C
-beforeCancelations <- nrow(OnlineretailClean)
-OnlineretailClean <- subset(OnlineretailClean, grepl("^(?!C).*$", OnlineretailClean$InvoiceNo, perl = TRUE))
-afterCancelations <- nrow(OnlineretailClean)
+#Remove canceled invoices: these invoices are beggining with C
+#Count number of records (canceled included)
+beforeCancelations <- nrow(onlineRetailClean)
+onlineRetailClean <- subset(onlineRetailClean, grepl("^(?!C).*$", onlineRetailClean$InvoiceNo, perl = TRUE))
+#Count number of records after having removed the canceled invoices
+afterCancelations <- nrow(onlineRetailClean)
+#Number of records removed
 beforeCancelations - afterCancelations
 
-#Finish cleaning dataset in one line 
-# DataToRemove <- c('POST', 'D', 'C2', 'M', 'BANK CHARGES', 'PADS', 'DOT')
-# 
-# OnlineretailClean <- subset(OnlineretailClean, !(StockCode %in% DataToRemove))
-
+#Remove other records that aren't orders
 #Remove POSTAGE
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "POST")
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "POST")
 
 #Remove Discount
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "D")
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "D")
 
-#Remove CARRIAGE
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "C2")
+#Remove C2
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "C2")
 
 #Remove Manual
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "M")
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "M")
 
 #Remove Bank Charges
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "BANK CHARGES")
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "BANK CHARGES")
 
-#Remove PADS TO MATCH ALL CUSHIONS 
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "PADS")
+#Remove PADS 
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "PADS")
 
-#Remove DOTCOM POSTAGE
-OnlineretailClean <- subset(OnlineretailClean, StockCode != "DOT")
+#Remove DOT
+onlineRetailClean <- subset(onlineRetailClean, StockCode != "DOT")
 
 #Remove Unit Price <= 0
-OnlineretailClean <- subset(OnlineretailClean, UnitPrice > 0)
+onlineRetailClean <- subset(onlineRetailClean, UnitPrice > 0)
 
 #Remove Quantity < 0
-OnlineretailClean <- subset(OnlineretailClean, Quantity > 0)
+onlineRetailClean <- subset(onlineRetailClean, Quantity > 0)
 
 #Remove Duplicates
-OnlineretailUnique <- unique(OnlineretailClean)
-dim(OnlineretailClean)-dim(OnlineretailUnique)
+onlineRetailUnique <- unique(onlineRetailClean)
+#Number of duplicate lines removed
+dim(onlineRetailClean)-dim(onlineRetailUnique)
 
-#Compute total revenue per row
-#setDT(OnlineretailClean)[, TotalPrice := as.numeric(as.character(UnitPrice))*Quantity]
-
-OnlineretailClean <- OnlineretailClean %>% 
+#We add a new column to compute the total price
+onlineRetailClean <- onlineRetailClean %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
 #1. Number of invoices (orders)
-ListOfInvoices <- Onlineretail["InvoiceNo"]
-length(ListOfInvoices[!duplicated(ListOfInvoices), ])
+listOfInvoices <- onlineRetailUnique["InvoiceNo"]
+length(listOfInvoices[!duplicated(listOfInvoices), ])
 #2. Number of products
-ListOfProducts <- Onlineretail["StockCode"]
-length(ListOfProducts[!duplicated(ListOfProducts), ])
+listOfProducts <- onlineRetailUnique["StockCode"]
+length(listOfProducts[!duplicated(listOfProducts), ])
 #3. Number of Countries
-ListOfCountry <- Onlineretail["Country"]
-length(ListOfCountry[!duplicated(ListOfCountry), ])
+listOfCountry <- onlineRetailUnique["Country"]
+length(listOfCountry[!duplicated(listOfCountry), ])
 #4. Number of Customers
-ListOfCustomers <- Onlineretail["CustomerID"]
-length(ListOfCustomers[!duplicated(ListOfCustomers), ])
+listOfCustomers <- onlineRetailUnique["CustomerID"]
+length(listOfCustomers[!duplicated(listOfCustomers), ])
 
-#5. Amount of purchases for each country
-PurchasesPerCountry <- aggregate(Onlineretail$Quantity, by=list(Category=Onlineretail$Country), FUN=sum)
-#View(PurchasesPerCountry)
-PurchasesNotUk <- PurchasesPerCountry[-36,]
+#5. Group the amount of purchases for each country
+purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$Country), FUN=sum)
+names(purchasesPerCountry) <- c("Country","Sales Country")
+summary(purchasesPerCountry[2])
 
-#PieChart with all countries: TO DO -> Calc the % of sales from UK (!!)
-slices <- PurchasesPerCountry[[2]]
-lbls <- PurchasesPerCountry[[1]]
-pie(slices, labels = lbls, main="Pie Chart of Countries without UK")
+#6. Create another variable to analyse the data out of the UK
+purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
-#Piechart without UK because it takes a too big part: TO DO -> only show the 10 biggest countries (!!)
-slicesNotUK <- PurchasesNotUk[[2]]
-lblsNotUK <- PurchasesNotUk[[1]]
-pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Countries without UK")
+#PIECHARTS
+#PieChart with all countries
+purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
+slices2 <- c(purchaseUk[[2]],sum(purchasesNotUk[[2]]))
+lbls2 <- c("United Kingdom", "Others")
+pie(slices2, labels = lbls2, main="Pie Chart of Sales")
 
+#Piechart with sales out of the United Kingdom
+slicesNotUK <- purchasesNotUk[[2]]
+lblsNotUK <- purchasesNotUk[[1]]
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
-#Countries with the most returns
-Returns <- subset(Onlineretail,Quantity<0)
-CountriesWithReturns <- aggregate(Returns$Quantity, by=list(Category=Returns$Country), FUN=sum)
-View(CountriesWithReturns)
+#Piechart with the countries with the most returns Out of the UK
+countriesTopSelling <- subset(purchasesNotUk, Quantity > 80000)
+names(countriesTopSelling) = c("Country", "Quantity")
+countriesLeastSelling <- subset(purchasesNotUk, Quantity <= 80000)
+otherCountries <- data.frame(Country="Others",Quantity=sum(countriesLeastSelling[[2]]))
 
+countriesTopSelling <- rbind(countriesTopSelling,otherCountries)
+slicesTopSelling <- countriesTopSelling[[2]]
+lblsTopSelling <- countriesTopSelling[[1]]
+
+pctTopSelling <- round(slicesTopSelling/sum(slicesNotUK)*100)
+lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
+lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
+pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
+
+#BOXPLOTS
 #Sales per product
-SalesPerProduct <- aggregate(Onlineretail$Quantity, by=list(StockCode=Onlineretail$StockCode), FUN=sum)
-View(SalesPerProduct)
-boxplot(SalesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
-#TO DO: Show the most returned product (!!)
+salesPerProduct <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
+names(salesPerProduct) <- c("StockCode","Sales Product")
+View(salesPerProduct)
 
-#Analysis of the % of quantity returned in comparison with the number ordered
-((-CountriesWithReturns[29,2]) / PurchasesPerCountry[36,2])*100
+#Boxplot of the sales per product
+boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
+summary(salesPerProduct[2])
 
-boxplot(Onlineretail, main= "Purchases", horizontal = TRUE, outline = FALSE,las=2)
+#Boxplot of the Quantity
+boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
 
+#---------------------------------------CODE À VERIFIER (contient des erreurs)-----------------------------------
+
+#GRAPHS
 #Invoices per month in 2011
 
 #Check format of dates
-OnlineretailClean$InvoiceDate <- mdy_hm(OnlineretailClean$InvoiceDate)
+onlineRetailUnique$InvoiceDate <- mdy_hm(onlineRetailUnique$InvoiceDate)
 
 #Creating object for date's year
-OnlineretailClean$InvoiceYear <- year(OnlineretailClean$InvoiceDate)
+onlineRetailUnique$InvoiceYear <- year(onlineRetailUnique$InvoiceDate)
 #Creating object for date's month
-OnlineretailClean$InvoiceMonth <- month(OnlineretailClean$InvoiceDate,label=T)
+onlineRetailUnique$InvoiceMonth <- month(onlineRetailUnique$InvoiceDate,label=T)
 #Creating object for date's day
-OnlineretailClean$InvoiceWeekday <- wday(OnlineretailClean$InvoiceDate, label=T)
+onlineRetailClean$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=T)
 #Creating object for date's hour
-OnlineretailClean$InvoiceHour <- hour(OnlineretailClean$InvoiceDate)
-View(OnlineretailClean)
+onlineRetailClean$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
+View(onlineRetailUnique)
 #Number of invoices per month in 2011
 #Filter to select year 2011 and count invoices for each month
-monthData <- OnlineretailClean %>% 
+monthData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceMonth)
 
@@ -203,7 +204,7 @@ ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day
 
 #Number of invoices per day in 2011
 #Filter to select year 2011 and count invoices for each day of the week
-dayData <- OnlineretailClean %>% 
+dayData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceWeekday)
 
@@ -214,7 +215,7 @@ ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day
 
 #Number of invoices per hour in 2011
 #Filter to select year 2011 and count invoices for each hour of the day
-hourData <- OnlineretailClean %>% 
+hourData <- onlineRetailUnique %>% 
   dplyr::filter(InvoiceYear==2011) %>% 
   count(InvoiceHour)
 
@@ -224,7 +225,7 @@ ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day
   labs(x="hour", y="Number of invoices")
 
 #Turnover per month in 2011
-SalesData <- OnlineretailClean %>%
+SalesData <- onlineRetailUnique %>%
   dplyr::filter(InvoiceYear == 2011) %>%
   group_by(InvoiceMonth) %>%
   summarise(CA = sum(TotalPrice))
@@ -232,36 +233,32 @@ SalesData <- OnlineretailClean %>%
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
-#<<<<<<< HEAD
-# labs(x="Month", y="Turnover in million")
-#
-#=======
-#  labs(x="Month", y="Turnover in thousand")
-#>>>>>>> a5fb17dde751436c450e59514bc906937edd915f
+
+#---------------------------------------FIN DE CODE À VERIFIER-----------------------------------
 
 #-------------------------------------------PCA-------------------------------------------
-#----A. ARANGE DATA SET----
-#length(unique(OnlineretailUnique$StockCode))
+#----PART 1: PREPARE DATASET FOR PCA----
 
-#Create a dataset per product (StockCode // sum of Quantity / Turnover[Quantity*UnitPrice] / Count of Customers)
-#Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
-stockPerQuantity <- aggregate(OnlineretailUnique$Quantity, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
+#Create a dataset per PRODUCT (StockCode // (a)sum of Quantity / (b)Turnover[Quantity*UnitPrice] / (c)Count of Customers / (d)AvgUnitPrice / (e)NbOfCountry )
+
+#(a)Create a dataset with aggregate() by combining the StockCode with the Quantity and then change the variables names with names()
+stockPerQuantity <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$StockCode), FUN=sum)
 names(stockPerQuantity) <- c("StockCode","Quantity")
 
-#Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
-stockPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=sum)
+#(b)Create a dataset with aggregate() by combining the StockCode with the Quantity*UnitPrice and then change the variables names with names()
+stockPerPurchases <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$StockCode), FUN=sum)
 names(stockPerPurchases) <- c("StockCode","Purchases")
 
-#Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
-stockPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
+#(c)Create a dataset with aggregate() by combining the StockCode with the NbOfCustomers and then change the variables names with names()
+stockPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCustomers) <- c("StockCode","NbOfCustomers")
 
-#Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
-stockPerUnitPrice <- aggregate(OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$StockCode), FUN=mean)
+#(d)Create a dataset with aggregate() by combining the StockCode with the UnitPrice and then change the variables names with names()
+stockPerUnitPrice <- aggregate(onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$StockCode), FUN=mean)
 names(stockPerUnitPrice) <- c("StockCode","Avg UnitPrice")
 
-#Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
-stockPerCountry <- aggregate(OnlineretailUnique$Country, by=list(Category=OnlineretailUnique$StockCode), FUN=function(x) length(unique(x)))
+#(e)Create a dataset with aggregate() by combining the StockCode with the Country and then change the variables names with names()
+stockPerCountry <- aggregate(onlineRetailUnique$Country, by=list(Category=onlineRetailUnique$StockCode), FUN=function(x) length(unique(x)))
 names(stockPerCountry) <- c("StockCode","NbOfCountry")
 
 #Merge the dataset to make productData
@@ -272,19 +269,21 @@ productData <- merge(productData, stockPerCountry, by="StockCode")
 row.names(productData) <- productData$StockCode
 productData <- productData[2:6]
 
+#Merged dataset for our PCA of the Products
 View(productData)
 
-#Create a dataset per Country (Country // NbOfProduct/Purchases/NbOfCustomers)
-#Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
-countryPerStockCode <- aggregate(OnlineretailUnique$StockCode, by=list(Category=OnlineretailUnique$Country), FUN=length)
+#Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers)
+
+#(a) Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
+countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerStockCode) <- c("Country","NbOfProduct")
 
-#Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
-countryPerPurchases <- aggregate(OnlineretailUnique$Quantity*OnlineretailUnique$UnitPrice, by=list(Category=OnlineretailUnique$Country), FUN=sum)
+#(b) Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
+countryPerPurchases <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$Country), FUN=sum)
 names(countryPerPurchases) <- c("Country","Turnover")
 
-#Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
-countryPerCustomers <- aggregate(OnlineretailUnique$CustomerID, by=list(Category=OnlineretailUnique$Country), FUN=length)
+#(c) Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
+countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
 #Merge the dataset to make countryData
@@ -293,10 +292,13 @@ countryData <- merge(countryData, countryPerCustomers, by="Country")
 row.names(countryData) <- countryData$Country
 countryData <- countryData[2:4]
 
+#Merged dataset for our PCA of the Countries
 View(countryData)
 
-#----B. GET INTO PCA----
-#--------------------PCA FOR PRODUCT----------------
+#----PART 2: GET INTO PCA----
+
+#----PCA: PRODUCT----
+
 #Plot of a matrix of data
 pairs(productData)
 
@@ -308,49 +310,50 @@ productData.CR<-scale(productData,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaProduct <- princomp(productData.CR)
 
-#Variance-covariance des variables centr? et r?duite
+#Variance-covariance of scaled and centered variables
 covarProduct<-cov(productData.CR)
-#valeurs propres et pourcentage d'info dans les composantes
+#summary of the componnent
 summary(pcaProduct)
 
-#visuel du summary
+#visual of the summary
 plot(pcaProduct)
 
-#poids des variables originelles dans les composantes
+#weight of the original variables in the component
 loadings(pcaProduct)
 
-#Projections finale
+#Final projection
 biplot(pcaProduct)
 
-#Utilisation de la librairie ade4 pour l'acp
+#Use the ade4 librarie for the acp
 pcaProductAde4<-dudi.pca(productData, scannf=FALSE,center = TRUE, scale = TRUE)
 
-# Impression des valeurs propres
+#Print the proper values
 pcaProductAde4$eig
-# Les variances cumul?es
+#Cumulative variances
 cumsum(pcaProductAde4$eig)
-# Les variances en pourcentages:
+#The varaince in percentage
 pcaProductAde4$eig/sum(pcaProductAde4$eig)*100
-# Le screeplot:
+#The screeplot
 barplot(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
-# Les pourcentages cumul?s :
+#The cumulative percentages
 cumsum(pcaProductAde4$eig/sum(pcaProductAde4$eig)*100)
 
-#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
+#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
 inertia.dudi(pcaProductAde4,col.inertia = T)$col.abs
 
-# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
+#link betwen component and variables in graph
 score(pcaProductAde4, xax=1)
 score(pcaProductAde4, xax=2)
 
-#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
-# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
-# - angle aigu = positive;
-# - angle droit = nulle;
-# - angle obtus = n?gative.
+#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
+#The angle between two arrows represents the correlation between them:
+# acute angle = positive;
+# right angle = zero;
+# obtuse angle = negative.
 s.corcircle(pcaProductAde4$co)
 
-#--------------------PCA FOR COUNTRY----------------
+#----PCA:COUNTRY-----
+
 #Plot of a matrix of data
 pairs(countryData)
 
@@ -362,49 +365,15 @@ countryData.CR<-scale(countryData,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaCountry <- princomp(countryData.CR)
 
-#Variance-covariance des variables centr? et r?duite
+#Variance-covariance of scaled and centered variables
 covarCountry<-cov(countryData.CR)
-#valeurs propres et pourcentage d'info dans les composantes
+#summary of the componnent
 summary(pcaCountry)
 
-#visuel du summary
+#visual of the summary
 plot(pcaCountry)
 
-#poids des variables originelles dans les composantes
-loadings(pcaCountry)
-
-#Projections finale
-biplot(pcaCountry)
-
-#Utilisation de la librairie ade4 pour l'acp
-pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
-
-# Impression des valeurs propres
-pcaCountryAde4$eig
-# Les variances cumul?es
-cumsum(pcaCountryAde4$eig)
-# Les variances en pourcentages:
-pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
-# Le screeplot:
-barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
-# Les pourcentages cumul?s :
-cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
-
-#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
-inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
-
-# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
-score(pcaCountryAde4, xax=1)
-score(pcaCountryAde4, xax=2)
-
-#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
-# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
-# - angle aigu = positive;
-# - angle droit = nulle;
-# - angle obtus = n?gative.
-s.corcircle(pcaCountryAde4$co)
-
-#--------------------PCA FOR COUNTRY WITHOUT UK----------------
+#----PCA: COUNTRIES WITHOUT UK----
 #Same without UK
 #Remove UK from the dataset 
 countryDataWithoutUK <- subset(countryData, !(rownames(countryData) %in% "United Kingdom"))
@@ -419,64 +388,17 @@ countryDataWithoutUK.CR<-scale(countryDataWithoutUK,center=TRUE,scale=TRUE)
 #Perform the pca and returns the results as an object
 pcaCountryWithoutUK <- princomp(countryDataWithoutUK.CR)
 
-#Variance-covariance des variables centr? et r?duite
+#Variance-covariance of scaled and centered variables
 covarCountryWithoutUK<-cov(countryDataWithoutUK.CR)
-#valeurs propres et pourcentage d'info dans les composantes
+#summary of the componnent
 summary(pcaCountryWithoutUK)
 
-#visuel du summary
+#Visual of the summary
 plot(pcaCountryWithoutUK)
-
-#poids des variables originelles dans les composantes
-loadings(pcaCountryWithoutUK)
-
-#Projections finale
-biplot(pcaCountryWithoutUK)
-
-#Utilisation de la librairie ade4 pour l'acp
-pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TRUE, scale = TRUE)
-
-# Impression des valeurs propres
-pcaCountryWithoutUK$eig
-# Les variances cumul?es
-cumsum(pcaCountryWithoutUK$eig)
-# Les variances en pourcentages:
-pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100
-# Le screeplot:
-barplot(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
-# Les pourcentages cumul?s :
-cumsum(pcaCountryWithoutUK$eig/sum(pcaCountryWithoutUK$eig)*100)
-
-#d?compostion l'inertie (la part de la variance totale expliqu?e) entre les variables et composantes (en 10000 ?mes):
-inertia.dudi(pcaCountryWithoutUK,col.inertia = T)$col.abs
-
-# Ces graphiques permettent de voir les liaisons entre les composantes et les variables.
-score(pcaCountryWithoutUK, xax=1)
-score(pcaCountryWithoutUK, xax=2)
-
-#Cercles de correlation o? la longueur des fl?ches indique la part de leur information repr?sent?e par les deux axes: 
-# L'angle entre deux  fl?ches repr?sente la corr?lation qui les lie : 
-# - angle aigu = positive;
-# - angle droit = nulle;
-# - angle obtus = n?gative.
-s.corcircle(pcaCountryWithoutUK$co)
 
 #-------------------------PART 3: CLUSTERING-------------------------
 
-#----------CLUSTERING ProductData------------
-#Cluster analysis or clustering is the task of grouping a set of objects 
-#in such a way that objects in the same group (called a cluster) are more similar (in some sense) 
-#to each other than to those in other groups (clusters). It is a main task of exploratory data mining,
-#and a common technique for statistical data analysis, used in many fields, including machine learning, pattern recognition,
-#image analysis, information retrieval, bioinformatics, data compression, and computer graphics.
-
-#1. Remove missing data with function na.omit (already done before when we removed the empty Customer ID)
-#2. Scale the data (already done in the PCA analysis)
-#3. K-means
-
-#Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
+#----CLUSTERING: ProductData----
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
@@ -664,7 +586,7 @@ text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountri
 
 #Cluster on words usage
 
-uniqueDescriptionList <- OnlineretailClean[!duplicated(OnlineretailClean[,c('Description')]),]
+uniqueDescriptionList <- onlineRetailClean[!duplicated(onlineRetailClean[,c('Description')]),]
 uniqueDescriptionList <- uniqueDescriptionList[c("StockCode", "Description")]
 #Putting a name for col description
 names(uniqueDescriptionList) <- c("StockCode","Description")
