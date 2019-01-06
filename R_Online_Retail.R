@@ -171,7 +171,7 @@ pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries ou
 #Sales per product
 salesPerProduct <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
 names(salesPerProduct) <- c("StockCode","Sales Product")
-View(salesPerProduct)
+#View(salesPerProduct)
 
 #Boxplot of the sales per product
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
