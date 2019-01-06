@@ -174,8 +174,6 @@ summary(salesPerProduct[2])
 #Boxplot of the Quantity
 boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
 
-#---------------------------------------CODE À VERIFIER (contient des erreurs)-----------------------------------
-
 #GRAPHS
 #Invoices per month in 2011
 
@@ -232,8 +230,6 @@ SalesData <- onlineRetailUnique %>%
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
-
-#---------------------------------------FIN DE CODE À VERIFIER-----------------------------------
 
 #-------------------------------------------PCA-------------------------------------------
 #----PART 1: PREPARE DATASET FOR PCA----
@@ -396,24 +392,128 @@ summary(pcaCountryWithoutUK)
 plot(pcaCountryWithoutUK)
 
 #-------------------------PART 3: CLUSTERING-------------------------
+#----CLUSTERING: CountryData----
+
+#-----COMPUTE THE NUMBER OF CLUSTERS-----
+#Prepare the data
+clusteringCountries <- countryDataWithoutUK
+
+scaled_data = as.matrix(scale(clusteringCountries))
+
+#Elbow Method for finding the optimal number of clusters
+set.seed(123)
+# Compute and plot wss for k = 2 to k = 15.
+k.max <- 5
+data <- scaled_data
+wss <- sapply(1:k.max, 
+              function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
+wss
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+abline(v = 3, lty =2)
+
+#-----COMPUTE THE CLUSTERS-----
+#J'introduis mon dataset dans mydata
+clusteringCountries2 <- countryDataWithoutUK
+
+#Je calcule mon ACP pour l'introduire dans mon dataset qui est centré
+clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 3, center = TRUE, scale = TRUE)
+
+#J'introduis mon ACP dans le DataSet
+clusteringCountries2 <- cbind(clusteringCountries2, clusteringCountries2.PCA$li)
+
+#Compute the kmeans
+clusteringCountries2.km <- kmeans(clusteringCountries2[,1:3], centers = 3, iter.max = 10, nstart = 10)
+
+#See how many data each cluster contains
+table(clusteringCountries2.km$cluster)
+
+#Show the centers
+clusteringCountries2.km$centers
+
+#Show the different clusters
+pairs(clusteringCountries2[,1:3],col=clusteringCountries2.km$cluster)
+
+#Create a scatterplotmatrix
+scatterplotMatrix(clusteringCountries2[,1:3],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
+
+aggregate(clusteringCountries2[,1:3], list(clusteringCountries2.km$cluster), mean)
+
+#Final Result
+plot(clusteringCountries2[,c("Axis1","Axis2")], col="white", main="K-means")
+text(clusteringCountries2[,c("Axis1","Axis2")], labels=rownames(clusteringCountries2), col=clusteringCountries2.km$cluster, main="K-means on scaled data", cex=0.50)
+
+#----A EFFACER (SAUF WORDCLOUD!!)----
 
 #----CLUSTERING: ProductData----
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
 
-#Scale productClustering
-productClustering.R <- scale(productClustering)
-
 # Elbow method
-fviz_nbclust(productClustering.R, kmeans, method = "wss") +
-  geom_vline(xintercept = 3, linetype = 2)+
-  labs(subtitle = "Elbow method")
+scaled_data = as.matrix(scale(productClustering))
+set.seed(123)
+# Compute and plot wss for k = 2 to k = 15.
+k.max <- 15
+productClustering.R <- scaled_data
+wss <- sapply(1:k.max, 
+              function(k){kmeans(productClustering.R, k, nstart=50,iter.max = 15 )$tot.withinss})
+wss
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+#We find the optimal number of clusters at 5, k = 5
+abline(v = 5, lty =2)
 
-# Silhouette method
-fviz_nbclust(productClustering.R, kmeans, method = "silhouette")+
-  labs(subtitle = "Silhouette method")
+#---------TEST-------
 
+# KMeans with k=5, 10 iterations for each kmeans, 10 kmeans tried..
+km1 <- kmeans(mydata[,1:4], centers = 5, iter.max = 10, nstart = 10)
+
+# Size of the clusters
+table(km1$cluster)
+# Clusters Centers
+km1$centers
+# Plot of the clusters
+pairs(mydata[,1:4],col=km1$cluster)
+# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
+library(car)
+scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
+
+# Representation of clusters in the 2 first principal components
+plot(mydata[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
+
+
+# Same algorithm, but on scaled data.
+km2 <- kmeans(scale(mydata[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
+# Size of the clusters
+table(km2$cluster)
+# Clusters Centers (with no direct meaning!)
+km2$centers
+# Cluster center on initial variables
+aggregate(mydata[,1:4], list(km2$cluster), mean)
+
+# Representation of clusters in the 2 first principal components
+plot(mydata[,c("Axis1","Axis2")], col=km2$cluster)
+scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
+scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
+cor(mydata[,1:4])
+
+# Comparison of the two results
+plot(mydata[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
+plot(mydata[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
+
+# Plot with labels
+plot(mydata[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
+text(mydata[,c("Axis1","Axis2")], labels=rownames(mydata), col=km2$cluster, main="K-means on scaled data", cex=0.7)
+
+
+
+
+#--------------TEST--------
 
 pca4<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
 productClustering<-cbind(productClustering,pca4$li)
@@ -454,10 +554,6 @@ plot(productClustering[,c("Axis1","Axis2")], col="white", main="K-means on scale
 text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering), col=km2$cluster, main="K-means on scaled data", cex=0.7)
 
 #----------CLUSTERING CountryData------------
-
-#Library necessary to add
-#install.packages("RcmdrMisc")# Uncomment if necessary
-#library(RcmdrMisc)
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 clusteringCountries <- countryDataWithoutUK
