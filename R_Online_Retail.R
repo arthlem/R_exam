@@ -500,8 +500,13 @@ countriesClustering.R <- as.matrix(scale(countriesClustering))
 #Elbow Method for finding the optimal number of clusters
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
+<<<<<<< HEAD
 k.max <- 15
 data <- countriesClustering.R
+=======
+k.max <- 10
+data <- scaled_data
+>>>>>>> 72b0e87735cdad7a82e521b954d1f9a5abfc2f5a
 wss <- sapply(1:k.max, 
               function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
 wss
@@ -509,7 +514,7 @@ plot(1:k.max, wss,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
-abline(v = 3, lty =2)
+abline(v = 4, lty =2)
 
 #-----COMPUTE THE CLUSTERS-----
 
@@ -520,7 +525,7 @@ countriesClustering.PCA <- dudi.pca(countriesClustering, scannf = FALSE, nf = 4,
 countriesClusteringWithPCA <- cbind(countriesClustering, countriesClustering.PCA$li)
 
 #Compute the kmeans
-countriesClustering.km <- kmeans(scale(countriesClustering[,1:4]), centers = 3, iter.max = 10, nstart = 10)
+countriesClustering.km <- kmeans(scale(countriesClustering[,1:4]), centers = 4, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
 table(countriesClustering.km$cluster)
@@ -540,19 +545,17 @@ aggregate(countriesClustering[,1:4], list(countriesClustering.km$cluster), mean)
 plot(countriesClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(countriesClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(countriesClustering), col=countriesClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 
-#----A EFFACER (SAUF WORDCLOUD!!)----
-
 #----CLUSTERING: ProductData----
 
 #Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
 productClustering <- productData
 
-# Elbow method
-scaled_data = as.matrix(scale(productClustering))
+#ELBOW METHOD
+#Centering the data
+productClustering.R <- as.matrix(scale(productClustering))
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
 k.max <- 15
-productClustering.R <- scaled_data
 wss <- sapply(1:k.max, 
               function(k){kmeans(productClustering.R, k, nstart=50,iter.max = 15 )$tot.withinss})
 wss
@@ -560,16 +563,20 @@ plot(1:k.max, wss,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
-#We find the optimal number of clusters at 5, k = 5
+
+#Thanks to the elbow method, we find the optimal number of clusters at 5 which means k = 5
 abline(v = 5, lty =2)
 
+#COMPUTE THE CLUSTERS
+
+#Compute the PCA for the productData cluster
 productClustering.PCA <- dudi.pca(productClustering, scannf = FALSE, nf = 5, center = TRUE, scale = TRUE)
 
 
-#J'introduis mon ACP dans le DataSet
+#Bind the PCA in the DataSet
 productClusteringWithPCA <- cbind(productClustering.R, productClustering.PCA$li)
 
-#Compute the kmeans
+#Compute the kmeans (with scaled data)
 productClustering.km <- kmeans(productClusteringWithPCA[,1:5], centers = 5, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
@@ -584,224 +591,13 @@ pairs(productClusteringWithPCA[,1:5],col=productClustering.km$cluster)
 #Create a scatterplotmatrix
 scatterplotMatrix(productClusteringWithPCA[,1:5],smooth=FALSE,groups=productClustering.km$cluster, by.groups=TRUE)
 
-pairs(productClusteringWithPCA[,1:5],col=productClustering.km$cluster)
-
 aggregate(productClusteringWithPCA[,1:5], list(productClustering.km$cluster), mean)
 
 #Final Result
 plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 
-
-
-# KMeans with k=5, 10 iterations for each kmeans, 10 kmeans tried..
-km1 <- kmeans(productClustering[,1:4], centers = 5, iter.max = 10, nstart = 10)
-
-# Size of the clusters
-table(km1$cluster)
-# Clusters Centers
-km1$centers
-# Plot of the clusters
-pairs(productClustering[,1:4],col=km1$cluster)
-# Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
-library(car)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-
-
-# Same algorithm, but on scaled data.
-km2 <- kmeans(scale(productClustering[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
-# Size of the clusters
-table(km2$cluster)
-# Clusters Centers (with no direct meaning!)
-km2$centers
-# Cluster center on initial variables
-aggregate(productClustering[,1:4], list(km2$cluster), mean)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
-cor(productClustering[,1:4])
-
-# Comparison of the two results
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
-
-# Plot with labels
-plot(productClustering[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering), col=km2$cluster, main="K-means on scaled data", cex=0.7)
-
-
-
-
-#--------------TEST--------
-
-pca4<-dudi.pca(productClustering[,1:4], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-productClustering<-cbind(productClustering,pca4$li)
-
-km1 <- kmeans(productClustering[,1:4], centers = 3, iter.max = 10, nstart = 10)
-table(km1$cluster)
-km1$centers
-
-#Plot the clusters
-pairs(productClustering[,1:4],col=km1$cluster)
-
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-
-# Same algorithm, but on scaled data.
-km2 <- kmeans(scale(productClustering[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
-# Size of the clusters
-table(km2$cluster)
-# Clusters Centers (with no direct meaning!)
-km2$centers
-# Cluster center on initial variables
-aggregate(productClustering[,1:4], list(km2$cluster), mean)
-
-# Representation of clusters in the 2 first principal components
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
-cor(productClustering[,1:4])
-
-# Comparison of the two results
-plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
-
-# Plot with labels
-plot(productClustering[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering), col=km2$cluster, main="K-means on scaled data", cex=0.7)
-
-#----------CLUSTERING CountryData------------
-
-#Va nous permettre de changer rapidement de dataset, sans devoir changer toutes les lignes de code
-clusteringCountries <- countryDataWithoutUK
-
-#Scale clusterCountries
-clusteringCountries.R <- scale(clusteringCountries)
-
-# Elbow method
-fviz_nbclust(clusteringCountries.R, kmeans, method = "wss") +
-  geom_vline(xintercept = 2, linetype = 2)+
-  labs(subtitle = "Elbow method")
-
-# Silhouette method
-fviz_nbclust(clusteringCountries.R, kmeans, method = "silhouette")+
-  labs(subtitle = "Silhouette method")
-
-pca5<-dudi.pca(clusteringCountries[,1:3], scannf=FALSE, nf=4,center = TRUE, scale = TRUE )
-clusteringCountries<-cbind(clusteringCountries,pca5$li)
-
-km3 <- kmeans(clusteringCountries[,1:3], centers = 3, iter.max = 10, nstart = 10)
-table(km3$cluster)
-km3$centers
-
-#Plot the clusters
-pairs(clusteringCountries[,1:3],col=km3$cluster)
-
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km3$cluster, by.groups=TRUE)
-
-# Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
-
-# Same algorithm, but on scaled data.
-km4 <- kmeans(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
-# Size of the clusters
-table(km4$cluster)
-# Clusters Centers (with no direct meaning!)
-km4$centers
-# Cluster center on initial variables
-aggregate(clusteringCountries[,1:3], list(km4$cluster), mean)
-
-# Representation of clusters in the 2 first principal components
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=TRUE)
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=km4$cluster, by.groups=FALSE)
-cor(clusteringCountries[,1:3])
-
-# Comparison of the two results
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km3$cluster, main="K-means")
-plot(clusteringCountries[,c("Axis1","Axis2")], col=km4$cluster, main="K-means on scaled data")
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(productData), col=km4$cluster, main="K-means on scaled data", cex=0.50)
-
-#HIERARCHICAL CLUSTERING -> Mieux pour les countries
-
-# Computing the distance matrix
-#mydata.dist<- dist(mydata[,1:4]) # not so good
-clusteringCountries.dist<- dist(scale(clusteringCountries[,1:3],center = TRUE,scale=TRUE)) # Better
-
-#Hclust with average link
-HClust.1 <- hclust(clusteringCountries.dist, method="average")
-plot(HClust.1, main= "Cluster Dendrogram for Solution HClust.1", xlab=
-       "Observation Number in Data Set", sub="Method=average; Distance=euclidian")
-# Cutting the tree to obtain 2 clusters
-hc.1<-cutree(HClust.1, k=2)
-# Size of the clusters
-table(hc.1)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.1, main="Clusters with average link." )
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.1, main="K-means on scaled data", cex=0.7)
-
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.1, by.groups=TRUE)
-
-# HClsut single link
-HClust.2 <- hclust(clusteringCountries.dist , method= "single")
-plot(HClust.2, main= "Cluster Dendrogram for Solution HClust.2", xlab=
-       "Observation Number in Data Set", sub="Method=single; Distance=euclidian")
-hc.2<-cutree(HClust.2, k=3)
-# Size of the clusters
-table(hc.2)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.2, main="Clusters with single link." )
-scatterplotMatrix(clusteringCountries[,1:4],smooth=FALSE,groups=hc.2, by.groups=TRUE)
-
-# HClust complete link
-HClust.3 <- hclust(clusteringCountries.dist, method="complete")
-plot(HClust.3, main= "Cluster Dendrogram for Solution HClust.3", xlab=
-       "Observation Number in Data Set", sub="Method=complete; Distance=euclidian")
-hc.3<-cutree(HClust.3, k=3)
-# Size of the clusters
-table(hc.3)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.3, main="Clusters with complete link." )
-scatterplotMatrix(clusteringCountries[,1:4],smooth=FALSE,groups=hc.3, by.groups=TRUE)
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.3, main="K-means on scaled data", cex=0.7)
-
-
-# HClust Ward.D link
-HClust.4 <- hclust(clusteringCountries.dist, method="ward.D")
-plot(HClust.4, main= "Cluster Dendrogram for Solution HClust.4", xlab=
-       "Observation Number in Data Set Iris", sub="Method=Ward; Distance=euclidian")
-hc.4<-cutree(HClust.4, k=3)
-# Size of the clusters
-table(hc.4)
-
-plot(clusteringCountries[,c("Axis1","Axis2")], col=hc.4, main="Clusters with complete link." )
-scatterplotMatrix(clusteringCountries[,1:3],smooth=FALSE,groups=hc.4, by.groups=TRUE)
-
-# Plot with labels
-plot(clusteringCountries[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountries), col=hc.4, main="K-means on scaled data", cex=0.7)
-
-# 
-#
-# CLUSTER ON WORDS USAGE
-#
-#
+#----BONUS: CLUSTER ON WORDS USAGE----
 
 #Cluster on words usage
 
@@ -812,7 +608,6 @@ names(uniqueDescriptionList) <- c("StockCode","Description")
 #Converting to corpus
 
 dd<-data.frame(doc_id=uniqueDescriptionList[["StockCode"]],text=uniqueDescriptionList[["Description"]])
-head(dd)
 
 docs <- VCorpus(DataframeSource(dd))
 
@@ -820,10 +615,6 @@ docs <- VCorpus(DataframeSource(dd))
 docs<-tm_map(docs, removeNumbers)
 # Convert to lowercase
 docs <- tm_map(docs,content_transformer(tolower))
-
-#docs<-tm_map(docs, PlainTextDocument)
-
-summary(docs)
 #Let's remove some useless words like colors..
 docs<-tm_map(docs, removeWords, c('pink', 'blue', 'tag', 'green', 'orange','red','black','purple','white','set'))
 #Remove stopwords
@@ -834,9 +625,6 @@ docs <- tm_map(docs, stripWhitespace)
 #Remove punctuation
 docs <- tm_map(docs, removePunctuation)
 
-#No need for this command because language is english
-#docs <- tm_map(docs,stemDocument)
-
 #Create a term document matrix from the corpus
 minTermFreq<- 25
 maxTermFreq<-Inf
@@ -846,10 +634,9 @@ dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf), bounds = list(
 rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document
 dtm   <- dtm[rowTotals> 0, ]
 
-
 ##Clustering
-tdm.tfidf <- tm::weightTfIdf(dtm)
-tdm.tfidf <- tm::removeSparseTerms(tdm.tfidf, 0.99) 
+dtm_tfxidf <- weightTfIdf(dtm)
+#dtm_tfxidf <- tm::removeSparseTerms(dtm_tfxidf, 0.99) 
 
 m <- as.matrix(dtm_tfxidf)
 
@@ -861,10 +648,12 @@ results <- kmeans(m_norm, 3)
 
 clusters <- 1:10
 
+# Get words repartition accross clusters.. 
 for(i in clusters){
   cat("Cluster ", i, ":", findFreqTerms(dtm_tfxidf[results$cluster== i,], lowfreq=25), "\n\n")
 }
 
+# Number of clusters
 fviz_nbclust(m_norm, kmeans, method = "silhouette")+
   labs(subtitle = "Silhouette method")
 
@@ -883,34 +672,14 @@ freq[tail(ord)]
 #That done, let’s take get a list of terms that occur at least a  40 times in the entire corpus. This is easily done using the findFreqTerms() function as follows:
 findFreqTerms(dtm,lowfreq=40)
 
-#findAssocs(dtmr,"hair",0.1)
-
+#Graph with words usage with freq > 40
 wf=data.frame(term=names(freq),occurrences=freq)
 ggplot(subset(wf, freq>40), aes(term, occurrences)) +
   geom_bar(stat="identity") +
   theme(axis.text.x=element_text(angle=45, hjust=1))
 
-#On construit un data.frame avec les fr?quences de mots:
-mfw<-data.frame(word=names(freq), freq=freq)
-# On s'assure que les mots sont dans l'ordre de fr?quences
-mfw<-mfw[order(mfw[,2], decreasing=TRUE),]
-
-# On fait un barplot des fr?quences
-barplot(mfw[,2], names.arg = mfw[,1],las=2, horiz = TRUE)
-# Heu il y a trop de mots, on n'y voit rien :D
-# On cr?e un nouvel index pour ne retenir que les mots apparaissant au 
-# moins 15 fois:
-mfw2<-subset(mfw, freq[ord]>15)
-# On refait le barplot en ajoutant une palette de couleur (avec la 
-# fonction heatcolors())  contenant autant de couleur que le nombre 
-# de lignes(de mots donc) retenues dan smfw2.
-barplot(mfw2[,2], names.arg = mfw2[,1],las=2,
-        horiz = TRUE, main="Most Frequent Words",
-        col=heat.colors(dim(mfw2)[1]))
-
-#setting the same seed each time ensures consistent look across clouds
-#set.seed(52)
 old.par <- par(mar = c(0, 0, 0, 0))
 par(old.par)
 #limit words by specifying min frequency and add color
 wordcloud(names(freq),freq,min.freq=25,scale=c(5, .1),colors=brewer.pal(6,"Dark2"), random.order=FALSE)
+
