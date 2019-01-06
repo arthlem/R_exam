@@ -134,14 +134,6 @@ pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 pie(slicesTopSelling, labels = lblsTopSelling, main="Summary of sales - UK excl.")
 ```
 
-
-## 3. Statistiques descriptives
-### c. Analyse des ventes
-```{r comment=NA}
-summary(salesPerProduct$`Sales Product`)
-boxplot(salesPerProduct[2], main= "Turnover per product", horizontal = TRUE, outline = FALSE,las=2)
-```
-
 ## 3. Statistiques descriptives
 ### c. Analyse des ventes
 ```{r comment=NA}
@@ -189,67 +181,67 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
 ```
 
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays
 ```{r comment=NA}
 pairs(countryData)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 ```{r comment=NA}
 pairs(countryDataWithoutUK)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Matrice des corrélations
 ```{r comment=NA}
 cor(countryDataWithoutUK)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Sommaire des composants
 ```{r comment=NA}
 summary(pcaCountryWithoutUK)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 ```{r comment=NA}
 plot(pcaCountryWithoutUK)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Poids des variables originales dans les composantes
 ```{r comment=NA}
 loadings(pcaCountryWithoutUK)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Lien entre les composantes et les variables (axis1)
 ```{r comment=NA}
 score(pcaCountryWithoutUKAde4, xax=1)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Lien entre les composantes et les variables (axis2)
 ```{r comment=NA}
 score(pcaCountryWithoutUKAde4, xax=2)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Cercle de corrélation
 ```{r comment=NA}
 s.corcircle(pcaCountryWithoutUKAde4$co)
 ```
 
-## 4. PCA
+## 4.1 PCA pays
 ### Aggrégation des données avec tous les pays sauf UK
 #### Projection des données
 ```{r comment=NA}
@@ -257,41 +249,41 @@ scatter(pcaCountryWithoutUKAde4, posieig="none")
 ```
 
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 ```{r comment=NA}
 pairs(productData)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Matrice des corrélations
 ```{r comment=NA}
 cor(productData)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Sommaire des composants
 ```{r comment=NA}
 summary(pcaProduct)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Plot du pca
 ```{r comment=NA}
 plot(pcaProduct)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Poids des variables originales dans les composants
 ```{r comment=NA}
 loadings(pcaProduct)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Lien entre les composantes et les variables (Axis1)
 ```{r comment=NA}
@@ -299,21 +291,21 @@ score(pcaProductAde4, xax=1)
 ```
 
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Lien entre les composantes et les variables (Axis2)
 ```{r comment=NA}
 score(pcaProductAde4, xax=2)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Cercle de corrélation
 ```{r comment=NA}
 s.corcircle(pcaProductAde4$co)
 ```
 
-## 4. PCA
+## 4.2 PCA produits
 ### Aggrégation de tous les produits
 #### Projection des données
 ```{r comment=NA}
@@ -334,6 +326,8 @@ abline(v = 4, lty =2)
 ### Table des clusters
 ```{r comment=NA}
 table(countriesClustering.km$cluster)
+cat("Les centres des clusters")
+countriesClustering.km$centers
 ```
 
 ## 5.1 Clustering des pays 
@@ -365,6 +359,8 @@ abline(v = 5, lty =2)
 ### Table des clusters
 ```{r comment=NA}
 table(productClustering.km$cluster)
+cat("Les centres des clusters")
+productClustering.km$centers
 ```
 
 ## 5.2 Clustering des produits 
