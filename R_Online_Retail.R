@@ -626,28 +626,6 @@ dtm <- DocumentTermMatrix(docs,control=list(wordLengths=c(3,Inf), bounds = list(
 rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document
 dtm   <- dtm[rowTotals> 0, ]
 
-#Tests
-
-dtm_tfxidf <- weightTfIdf(dtm)
-
-dtmss <- removeSparseTerms(dtm, 0.99) # This makes a matrix that is only 25% empty space, maximum.   
-inspect(dtmss) 
-
-d <- dist(t(dtmss), method="euclidian")   
-# Clustering:
-fit <- hclust(d=d, method="complete")   
-# Dendrogram:
-plot(fit)
-plot(fit, hang=-1)# Pour avoir tous les mots ? la m?me hauteur
-# Groupons les mots en 10 groupes:
-groups <- cutree(fit, k=5)   # "k=" defines the number of clusters you are using
-# On ajoute les groupes au dendrogramme:
-rect.hclust(fit, k=5, border="red") # draw dendogram with red borders around 
-# the 10 clusters   
-
-# Sizes of the clusters
-table(groups)
-
 
 ##Clustering
 tdm.tfidf <- tm::weightTfIdf(dtm)

@@ -1,0 +1,179 @@
+---
+title: "Présentation R: Online Retail"
+author: "Arthur Lemoine, François Somville, Alexandre Antippas"
+date: "Janvier 2019"
+output:
+  ioslides_presentation
+fontsize: 11pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+chooseCRANmirror(graphics=FALSE, ind=1)
+pkgs <- c("ggplot2","dplyr","lubridate","ade4","tm","SnowballC","wordcloud","cluster","factoextra","NbClust","gridExtra")
+#install.packages(pkgs)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(lubridate)
+library(ade4)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(cluster)
+library(factoextra)
+library(NbClust)
+library(gridExtra)
+```
+
+```{r load myData, include=FALSE}
+load("data.RData")
+```
+
+## Plan
+1. Analyse des données importées
+2. Nettoyage des données
+3. Statistiques descriptives
+4. Analyse des composantes principales (ACP)
+5. Clustering
+6. Bonus
+
+## 1. Analyse des données importées
+
+### a. Qui?
+Le dataset contient toutes les ventes émises par un magasin en ligne basé en Angleterre. Le magasin vend des cadeaux uniques pour toutes les occasions.
+
+### b. Quoi?
+<font size="4"> 
+1. <b>InvoiceNo:</b> Contient le numéro de la facture <br>
+2. <b>StockCode:</b> Numéro d'identification du produit (C indique une annulation)<br>
+3. <b>Description:</b> Description du produit<br>
+4. <b>Quantity:</b> Quanitités de pièces commandé<br>
+5. <b>InvoiceDate:</b> Date de la facture avec l'heure<br>
+6. <b>UnitPrice:</b> Prix de l'unité en livre sterling<br>
+7. <b>CustomerID:</b> ID du client (NA lors de modification de stock)<br>
+8. <b>Country:</b> Pays destinataire<br> </font size>
+
+## 1. Analyse des données importées
+### c. Où, Source?
+
+### d. Quand?
+```{r comment=NA}
+cat("Du",as.character(head(select(onlineRetail, InvoiceDate), 1)[[1]]), "au", as.character(tail(select(onlineRetail, InvoiceDate), 1)[[1]]))
+```
+
+### e. Combien?
+```{r comment=NA}
+cat(nrow(onlineRetail), "dans le dataset")
+```
+
+## 2. Nettoyage des données
+### a. Données non pertinentes
+<font size="4"> 
+1. <b>C:</b> Annulation<br>
+2. <b>C2:</b> Transport<br>
+3. <b>D:</b> Réductions<br>
+4. <b>POST:</b> Frais postaux<br>
+5. <b>M:</b> Ajout manuel<br>
+6. <b>BANK CHARGES:</b> Frais bancaire<br>
+7. <b>PADS:</b> Pas de rapport avec les produits<br>
+8. <b>DOT:</b> DOTCOM POSTAGE<br> 
+9. <b>UnitPrice < 0</b><br> 
+10. <b>Quantity < 0</b><br> 
+</font size>
+
+## 2. Nettoyage de données
+###	b. Nombre de lignes Nettoyées
+```{r comment=NA}
+cat(nrow(onlineRetail),"lignes à la base")
+cat(nrow(onlineRetailClean), "lignes après nettoyage")
+cat(nrow(onlineRetailUnique), "lignes après nettoyage et unique")
+cat("Pourcentage retiré :", 100 - (nrow(onlineRetailUnique)/nrow(onlineRetail)*100), "%")
+```
+
+## 3. Statistiques descriptives
+### a. Analyse générale
+```{r comment=NA}
+cat("i. Nombre de pays:",length(unique(onlineRetailUnique$Country)), "(Attention 37 + undefined)")
+cat("ii. Nombre de factures (uniques):",length(unique(onlineRetailUnique$InvoiceNo)))
+cat("iii. Nombre de clients (uniques):",length(unique(onlineRetailUnique$CustomerID)))
+cat("iv. Nombre de produits (uniques):",length(unique(onlineRetailUnique$StockCode)))
+
+
+cat("Summary des quantités par facture","\n")
+summary(onlineRetailUnique$Quantity)
+```
+
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r}
+pie(slices2, labels = lbls2, main="Pie Chart of Sales")
+```
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r}
+pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
+```
+
+
+## 3. Statistiques descriptives
+### b. Analyse des ventes selon les pays
+```{r}
+pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
+```
+
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### i.	Summary 
+```{r}
+summary(purchasesPerCountry[2])
+summary(salesPerProduct[2])
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### ii.	Boxplot des ventes
+```{r}
+boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### ii.	Boxplot des ventes
+```{r}
+boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### iii.	Factures par mois en 2011
+```{r}
+ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Month", y="Number of invoices")
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### iv.	Factures par jour en 2011
+```{r}
+ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="Week", y="Number of invoices")
+```
+
+## 3. Statistiques descriptives
+### c. Analyse des ventes
+#### v.	Factures par heure du jour en 2011
+```{r}
+ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day               
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
+  labs(x="hour", y="Number of invoices")
+```
