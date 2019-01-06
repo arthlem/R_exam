@@ -45,70 +45,71 @@ load("data.RData")
 3. Statistiques descriptives
 4. Analyse des composantes principales (ACP)
 5. Clustering
-6. Bonus: Wordcloud
+6. Bonus
 
-## 1. Analyse des données importées
+##1. Analyse des données importées
 
-### Introduction
-Le dataset contient toutes les ventes émises par un magasin en ligne basé au Royaume-Uni. Le magasin vend des cadeaux uniques pour toutes les occasions.
+### <b>Introduction</b>
+<font size="4">Le dataset contient toutes les ventes enregistrées par un magasin en ligne basé au Royaume-Uni. Le magasin vend des cadeaux pour toutes les occasions.</font size>
 
-### 8 variables
+### <b>8 variables</b>
 <font size="4"> 
-1. <b>InvoiceNo:</b> Contient le numéro de la facture <br>
+1. <b>InvoiceNo:</b> Numéro de la facture <br>
 2. <b>StockCode:</b> Numéro d'identification du produit (C indique une annulation)<br>
 3. <b>Description:</b> Description du produit<br>
-4. <b>Quantity:</b> Quanitités de pièces commandé<br>
-5. <b>InvoiceDate:</b> Date de la facture avec l'heure<br>
-6. <b>UnitPrice:</b> Prix de l'unité en livre sterling<br>
-7. <b>CustomerID:</b> ID du client (NA lors de modification de stock)<br>
+4. <b>Quantity:</b> Quantités de pièces commandées<br>
+5. <b>InvoiceDate:</b> Date et heure de la facture<br>
+6. <b>UnitPrice:</b> Prix à l'unité en livre sterling<br>
+7. <b>CustomerID:</b> ID du client (NA lors de modifications de stock)<br>
 8. <b>Country:</b> Pays destinataire<br> </font size>
 
 ## 1. Analyse des données importées
-### Source:
+### <b>Source</b>
+<font size="4">UCI Machine Learning Repository</font size>
 ```{r comment=NA}
-cat("Source: https://archive.ics.uci.edu/ml/datasets/Online+Retail")
+cat("https://archive.ics.uci.edu/ml/datasets/Online+Retail")
 ```
 
 
-### Période:
+### <b>Période</b>
 ```{r comment=NA}
 cat("Du",as.character(head(select(onlineRetail, InvoiceDate), 1)[[1]]), "au", as.character(tail(select(onlineRetail, InvoiceDate), 1)[[1]]))
 ```
 
-### Taille:
+### <b>Taille</b>
 ```{r comment=NA}
 cat(nrow(onlineRetail), "lignes dans le dataset")
 ```
 
 ## 2. Nettoyage des données
-### a. Données non pertinentes
+### <b>a. Données non pertinentes</b>
 <font size="4"> 
-1. <b>C:</b> Annulation<br>
+1. <b>C:</b> Annulations<br>
 2. <b>C2:</b> Transport<br>
 3. <b>D:</b> Réductions<br>
 4. <b>POST:</b> Frais postaux<br>
-5. <b>M:</b> Ajout manuel<br>
-6. <b>BANK CHARGES:</b> Frais bancaire<br>
+5. <b>M:</b> Ajouts manuels<br>
+6. <b>BANK CHARGES:</b> Frais bancaires<br>
 7. <b>PADS:</b> Frais d'emballage<br>
 8. <b>DOT:</b> DOTCOM POSTAGE<br> 
-9. <b>UnitPrice < 0</b><br> 
-10. <b>Quantity < 0</b><br> 
+9. <b>Prix à l'unité < 0</b><br> 
+10. <b>Quantité < 0</b><br> 
 11. <b>CustomerID = NA</b>
 </font size>
 
 ## 2. Nettoyage des données
-###	b. Nombre de lignes Nettoyées
+###	<b>b. Nombre de lignes nettoyées</b>
 ```{r comment=NA}
-cat(nrow(onlineRetail),"lignes à la base")
+cat(nrow(onlineRetail),"lignes au départ")
 cat(nrow(onlineRetailClean), "lignes après nettoyage")
-cat(nrow(onlineRetailUnique), "lignes après nettoyage et suppression des duplications")
-cat("Pourcentage retiré :", 100 - (nrow(onlineRetailUnique)/nrow(onlineRetail)*100), "%")
+cat(nrow(onlineRetailUnique), "lignes après suppression des doublons")
+cat("Pourcentage nettoyé :", 100 - (nrow(onlineRetailUnique)/nrow(onlineRetail)*100), "%")
 ```
 
 ## 3. Statistiques descriptives
-### a. Analyse générale
+### <b>Introduction</b>
 ```{r comment=NA}
-cat("i. Nombre de pays:",length(unique(onlineRetailUnique$Country)), "(Attention 37 + 'undefined')")
+cat("i. Nombre de pays:",length(unique(onlineRetailUnique$Country)), "(dont 1 'unspecified')")
 cat("ii. Nombre de factures (uniques):",length(unique(onlineRetailUnique$InvoiceNo)))
 cat("iii. Nombre de clients (uniques):",length(unique(onlineRetailUnique$CustomerID)))
 cat("iv. Nombre de produits (uniques):",length(unique(onlineRetailUnique$StockCode)))
@@ -116,133 +117,132 @@ cat("iv. Nombre de produits (uniques):",length(unique(onlineRetailUnique$StockCo
 
 
 ## 3. Statistiques descriptives
-### b. Analyse des ventes selon les pays
+###<b> b. Analyse des ventes selon les pays </b>
 ```{r comment=NA}
-pie(slices2, labels = lbls2, main="Pie Chart of Sales")
+pie(slices2, labels = lbls2, main="Diagramme circulaire des ventes par pays")
 ```
 
 ## 3. Statistiques descriptives
-### b. Analyse des ventes selon les pays
+###<b> b. Analyse des ventes selon les pays</b>
 ```{r comment=NA}
-pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
+pie(slicesNotUK, labels = lblsNotUK, main="Diagramme circulaire des ventes hors UK")
 ```
 
 
 ## 3. Statistiques descriptives
-### b. Analyse des ventes selon les pays
+###<b> b. Analyse des ventes selon les pays</b>
 ```{r comment=NA}
-pie(slicesTopSelling, labels = lblsTopSelling, main="Summary of sales - UK excl.")
+pie(slicesTopSelling, labels = lblsTopSelling, main="Résumé des ventes hors UK")
 ```
 
 ## 3. Statistiques descriptives
-### c. Analyse des ventes
+### <b>c. Analyse des ventes</b>
 ```{r comment=NA}
 summary(invoiceData$`Sales Invoice`)
-boxplot(invoiceData[2], main= "Turnover per invoice", horizontal = TRUE, outline = FALSE,las=2)
+boxplot(invoiceData[2], main= "CA par facture", horizontal = TRUE, outline = FALSE,las=2)
 ```
 
 ## 3. Statistiques descriptives
-### c. Analyse des ventes
-#### Factures par mois en 2011
+### <b>c. Analyse des ventes</b>
+#### Factures par <font color="blue"><b>mois</b></font> en 2011
 ```{r comment=NA}
 ggplot(monthData, aes(InvoiceMonth, n)) +  #plot the number of invoices per day               
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
-  labs(x="Month", y="Number of invoices")
+  labs(x="Mois", y="Nombre de factures")
 ```
 
 ## 3. Statistiques descriptives
-### c. Analyse des ventes
-#### Factures par jour en 2011
+### <b>c. Analyse des ventes</b>
+#### Factures par <font color="blue"><b>jour</b></font> en 2011
 ```{r comment=NA}
 ggplot(dayData, aes(InvoiceWeekday, n)) +  #plot the number of invoices per day               
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
-  labs(x="Week", y="Number of invoices")
+  labs(x="Semaine", y="Nombre de factures")
 ```
 
 ## 3. Statistiques descriptives
-### c. Analyse des ventes
-#### Factures par heure du jour en 2011
+### <b>c. Analyse des ventes</b>
+#### Factures selon <font color="blue"><b>l'heure de la journée</b></font> en 2011
 ```{r comment=NA}
 ggplot(hourData, aes(InvoiceHour, n)) +  #plot the number of invoices per day               
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=n), vjust=1.6, color="white", size=3.5)+
-  labs(x="hour", y="Number of invoices")
+  labs(x="Heure", y="Nombre de factures")
 ```
 
 ## 3. Statistiques descriptives
-### c. Analyse des ventes
-#### Chiffre d'affaire par mois
+### <b>c. Analyse des ventes</b>
+#### Chiffre d'affaires par <font color="blue"><b>mois</b></font>
 ```{r comment=NA}
 ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +              
   geom_bar(stat="identity", fill="steelblue")+
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
 ```
 
-
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays
+### Agrégation des données de tous les pays
 ```{r comment=NA}
 pairs(countryData)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 ```{r comment=NA}
 pairs(countryDataWithoutUK)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 #### Matrice des corrélations
 ```{r comment=NA}
 cor(countryDataWithoutUK)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 #### Sommaire des composants
 ```{r comment=NA}
 summary(pcaCountryWithoutUK)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 ```{r comment=NA}
 plot(pcaCountryWithoutUK)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
-#### Poids des variables originales dans les composantes
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
+#### Poids des variables originales dans les composants
 ```{r comment=NA}
 loadings(pcaCountryWithoutUK)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
-#### Lien entre les composantes et les variables (axis1)
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
+#### Lien entre les composants et les variables (axis1)
 ```{r comment=NA}
 score(pcaCountryWithoutUKAde4, xax=1)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
-#### Lien entre les composantes et les variables (axis2)
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
+#### Lien entre les composants et les variables (axis2)
 ```{r comment=NA}
 score(pcaCountryWithoutUKAde4, xax=2)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 #### Cercle de corrélation
 ```{r comment=NA}
 s.corcircle(pcaCountryWithoutUKAde4$co)
 ```
 
 ## 4.1 PCA pays
-### Aggrégation des données avec tous les pays sauf UK
+### Agrégation des données des pays <font color="orange"><b>hors UK</b></font>
 #### Projection des données
 ```{r comment=NA}
 scatter(pcaCountryWithoutUKAde4, posieig="none")
@@ -250,63 +250,62 @@ scatter(pcaCountryWithoutUKAde4, posieig="none")
 
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 ```{r comment=NA}
 pairs(productData)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 #### Matrice des corrélations
 ```{r comment=NA}
 cor(productData)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 #### Sommaire des composants
 ```{r comment=NA}
 summary(pcaProduct)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
-#### Plot du pca
+### Agrégation de tous les produits
 ```{r comment=NA}
 plot(pcaProduct)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 #### Poids des variables originales dans les composants
 ```{r comment=NA}
 loadings(pcaProduct)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
-#### Lien entre les composantes et les variables (Axis1)
+### Agrégation de tous les produits
+#### Lien entre les composants et les variables (Axis1)
 ```{r comment=NA}
 score(pcaProductAde4, xax=1)
 ```
 
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
-#### Lien entre les composantes et les variables (Axis2)
+### Agrégation de tous les produits
+#### Lien entre les composants et les variables (Axis2)
 ```{r comment=NA}
 score(pcaProductAde4, xax=2)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 #### Cercle de corrélation
 ```{r comment=NA}
 s.corcircle(pcaProductAde4$co)
 ```
 
 ## 4.2 PCA produits
-### Aggrégation de tous les produits
+### Agrégation de tous les produits
 #### Projection des données
 ```{r comment=NA}
 scatter(pcaProductAde4, posieig = "none", clab.row = 0)
@@ -317,7 +316,7 @@ scatter(pcaProductAde4, posieig = "none", clab.row = 0)
 ```{r comment=NA}
 plot(1:k.max, wssCountries,
      type="b", pch = 19, frame = FALSE, 
-     xlab="Number of clusters K",
+     xlab="Number of clusters (K)",
      ylab="Total within-clusters sum of squares")
 abline(v = 4, lty =2)
 ```
@@ -326,8 +325,6 @@ abline(v = 4, lty =2)
 ### Table des clusters
 ```{r comment=NA}
 table(countriesClustering.km$cluster)
-cat("Les centres des clusters")
-countriesClustering.km$centers
 ```
 
 ## 5.1 Clustering des pays 
@@ -350,7 +347,7 @@ wssProducts <- sapply(1:k.max2,
               function(k){kmeans(productData.CR, k, nstart=50,iter.max = 15 )$tot.withinss})
 plot(1:k.max2, wssProducts,
      type="b", pch = 19, frame = FALSE, 
-     xlab="Number of clusters K",
+     xlab="Number of clusters (K)",
      ylab="Total within-clusters sum of squares")
 abline(v = 5, lty =2)
 ```
@@ -359,8 +356,6 @@ abline(v = 5, lty =2)
 ### Table des clusters
 ```{r comment=NA}
 table(productClustering.km$cluster)
-cat("Les centres des clusters")
-productClustering.km$centers
 ```
 
 ## 5.2 Clustering des produits 
@@ -373,7 +368,6 @@ pairs(productClusteringWithPCA[,1:5],col=productClustering.km$cluster)
 ```{r comment=NA}
 plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
-
 ```
 
 
