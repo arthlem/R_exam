@@ -171,7 +171,7 @@ pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries ou
 #Sales per product
 salesPerProduct <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(StockCode=onlineRetailUnique$StockCode), FUN=sum)
 names(salesPerProduct) <- c("StockCode","Sales Product")
-View(salesPerProduct)
+#View(salesPerProduct)
 
 #Boxplot of the sales per product
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
@@ -279,7 +279,7 @@ View(productData)
 #Create a dataset per COUNTRY (Country // (a)NbOfProduct/ (b)Purchases/ (c)NbOfCustomers)
 
 #(a) Create a dataset with aggregate() by combining the Country with the nbOfStockCode and then change the variables names with names()
-countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=length)
+countryPerStockCode <- aggregate(onlineRetailUnique$StockCode, by=list(Category=onlineRetailUnique$Country), FUN=function(x) length(unique(x)))
 names(countryPerStockCode) <- c("Country","NbOfProduct")
 
 #(b) Create a dataset with aggregate() by combining the Country with the Quantity*UnitPrice and then change the variables names with names()
@@ -287,11 +287,11 @@ countryPerPurchases <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$
 names(countryPerPurchases) <- c("Country","Turnover")
 
 #(c) Create a dataset with aggregate() by combining the Country with the nbOfCustomers and then change the variables names with names()
-countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=length)
+countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=function(x) length(unique(x)))
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
 #(d) Create a dataset with aggregate() by combining the Country with the nbOfInvoice and then change the variables names with names()
-countryPerInvoice <- aggregate(onlineRetailUnique$InvoiceNo, by=list(Category=onlineRetailUnique$Country), FUN=length)
+countryPerInvoice <- aggregate(onlineRetailUnique$InvoiceNo, by=list(Category=onlineRetailUnique$Country), FUN=function(x) length(unique(x)))
 names(countryPerInvoice) <- c("Country","NbOfInvoice")
 
 #Merge the dataset to make countryData
@@ -387,6 +387,45 @@ summary(pcaCountry)
 #visual of the summary
 plot(pcaCountry)
 
+#weight of the original variables in the component
+loadings(pcaCountry)
+
+#Final projection
+biplot(pcaCountry)
+
+#Use the ade4 librarie for the acp
+pcaCountryAde4<-dudi.pca(countryData, scannf=FALSE,center = TRUE, scale = TRUE)
+
+#Print the proper values
+pcaCountryAde4$eig
+#Cumulative variances
+cumsum(pcaCountryAde4$eig)
+#The varaince in percentage
+pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100
+#The screeplot
+barplot(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+#The cumulative percentages
+cumsum(pcaCountryAde4$eig/sum(pcaCountryAde4$eig)*100)
+
+#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+inertia.dudi(pcaCountryAde4,col.inertia = T)$col.abs
+
+#link betwen component and variables in graph
+score(pcaCountryAde4, xax=1)
+score(pcaCountryAde4, xax=2)
+
+#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
+#The angle between two arrows represents the correlation between them:
+# acute angle = positive;
+# right angle = zero;
+# obtuse angle = negative.
+s.corcircle(pcaCountryAde4$co)
+
+#Data projection with the new axis
+scatter(pcaCountryAde4, posieig="none")
+#Data projection with the new axis (but with dot)
+scatter(pcaCountryAde4, posieig="none", clab.row=0)
+
 #----PCA: COUNTRIES WITHOUT UK----
 #Same without UK
 #Remove UK from the dataset 
@@ -409,6 +448,45 @@ summary(pcaCountryWithoutUK)
 
 #Visual of the summary
 plot(pcaCountryWithoutUK)
+
+#weight of the original variables in the component
+loadings(pcaCountryWithoutUK)
+
+#Final projection
+biplot(pcaCountryWithoutUK)
+
+#Use the ade4 librarie for the acp
+pcaCountryWithoutUKAde4<-dudi.pca(countryDataWithoutUK, scannf=FALSE,center = TRUE, scale = TRUE)
+
+#Print the proper values
+pcaCountryWithoutUKAde4$eig
+#Cumulative variances
+cumsum(pcaCountryWithoutUKAde4$eig)
+#The varaince in percentage
+pcaCountryWithoutUKAde4$eig/sum(pcaCountryWithoutUKAde4$eig)*100
+#The screeplot
+barplot(pcaCountryWithoutUKAde4$eig/sum(pcaCountryWithoutUKAde4$eig)*100)
+#The cumulative percentages
+cumsum(pcaCountryWithoutUKAde4$eig/sum(pcaCountryWithoutUKAde4$eig)*100)
+
+#decomposition of inertia (the share of total variance explained) between variables and components (in 10000 ths)
+inertia.dudi(pcaCountryWithoutUKAde4,col.inertia = T)$col.abs
+
+#link betwen component and variables in graph
+score(pcaCountryWithoutUKAde4, xax=1)
+score(pcaCountryWithoutUKAde4, xax=2)
+
+#Corelation circle. the lenght of an arrow shows the part of information on two axis: 
+#The angle between two arrows represents the correlation between them:
+# acute angle = positive;
+# right angle = zero;
+# obtuse angle = negative.
+s.corcircle(pcaCountryWithoutUKAde4$co)
+
+#Data projection with the new axis
+scatter(pcaCountryWithoutUKAde4, posieig="none")
+#Data projection with the new axis (but with dot)
+scatter(pcaCountryWithoutUKAde4, posieig="none", clab.row=0)
 
 #-------------------------PART 3: CLUSTERING-------------------------
 #----CLUSTERING: CountryData----
@@ -438,13 +516,13 @@ abline(v = 3, lty =2)
 clusteringCountries2 <- countryDataWithoutUK
 
 #Je calcule mon ACP pour l'introduire dans mon dataset qui est centré
-clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 3, center = TRUE, scale = TRUE)
+clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 4, center = TRUE, scale = TRUE)
 
 #J'introduis mon ACP dans le DataSet
 clusteringCountries2 <- cbind(clusteringCountries2, clusteringCountries2.PCA$li)
 
 #Compute the kmeans
-clusteringCountries2.km <- kmeans(clusteringCountries2[,1:3], centers = 3, iter.max = 10, nstart = 10)
+clusteringCountries2.km <- kmeans(scale(clusteringCountries2[,1:4]), centers = 3, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
 table(clusteringCountries2.km$cluster)
@@ -453,12 +531,12 @@ table(clusteringCountries2.km$cluster)
 clusteringCountries2.km$centers
 
 #Show the different clusters
-pairs(clusteringCountries2[,1:3],col=clusteringCountries2.km$cluster)
+pairs(clusteringCountries2[,1:4],col=clusteringCountries2.km$cluster)
 
 #Create a scatterplotmatrix
-scatterplotMatrix(clusteringCountries2[,1:3],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
+scatterplotMatrix(clusteringCountries2[,1:4],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
 
-aggregate(clusteringCountries2[,1:3], list(clusteringCountries2.km$cluster), mean)
+aggregate(clusteringCountries2[,1:4], list(clusteringCountries2.km$cluster), mean)
 
 #Final Result
 plot(clusteringCountries2[,c("Axis1","Axis2")], col="white", main="K-means")
