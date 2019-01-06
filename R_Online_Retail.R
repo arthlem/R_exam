@@ -500,7 +500,7 @@ scaled_data = as.matrix(scale(clusteringCountries))
 #Elbow Method for finding the optimal number of clusters
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
-k.max <- 5
+k.max <- 10
 data <- scaled_data
 wss <- sapply(1:k.max, 
               function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
@@ -509,7 +509,7 @@ plot(1:k.max, wss,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
-abline(v = 3, lty =2)
+abline(v = 4, lty =2)
 
 #-----COMPUTE THE CLUSTERS-----
 #J'introduis mon dataset dans mydata
@@ -522,7 +522,7 @@ clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 
 clusteringCountries2 <- cbind(clusteringCountries2, clusteringCountries2.PCA$li)
 
 #Compute the kmeans
-clusteringCountries2.km <- kmeans(scale(clusteringCountries2[,1:4]), centers = 3, iter.max = 10, nstart = 10)
+clusteringCountries2.km <- kmeans(scale(clusteringCountries2[,1:4]), centers = 4, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
 table(clusteringCountries2.km$cluster)
