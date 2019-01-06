@@ -512,7 +512,7 @@ k.max <- 15
 wssCountries <- sapply(1:k.max, 
               function(k){kmeans(countryDataWithoutUK.CR, k, nstart=50,iter.max = 15 )$tot.withinss})
 wssCountries
-plot(1:k.max, wss,
+plot(1:k.max, wssCountries,
      type="b", pch = 19, frame = FALSE, 
      xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares")
