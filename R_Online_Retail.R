@@ -108,7 +108,7 @@ onlineRetailUnique <- unique(onlineRetailClean)
 dim(onlineRetailClean)-dim(onlineRetailUnique)
 
 #We add a new column to compute the total price
-onlineRetailClean <- onlineRetailClean %>% 
+onlineRetailUnique <- onlineRetailUnique %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
 #----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
@@ -128,7 +128,7 @@ length(listOfCustomers[!duplicated(listOfCustomers), ])
 
 #5. Group the amount of purchases for each country
 purchasesPerCountry <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$Country), FUN=sum)
-names(purchasesPerCountry) <- c("Country","Sales Country")
+names(purchasesPerCountry) <- c("Country","SalesCountry")
 summary(purchasesPerCountry[2])
 
 #6. Create another variable to analyse the data out of the UK
@@ -147,10 +147,10 @@ lblsNotUK <- purchasesNotUk[[1]]
 pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
 #Piechart with the countries with the most returns Out of the UK
-countriesTopSelling <- subset(purchasesNotUk, Quantity > 80000)
-names(countriesTopSelling) = c("Country", "Quantity")
-countriesLeastSelling <- subset(purchasesNotUk, Quantity <= 80000)
-otherCountries <- data.frame(Country="Others",Quantity=sum(countriesLeastSelling[[2]]))
+countriesTopSelling <- subset(purchasesNotUk, SalesCountry > 80000)
+names(countriesTopSelling) = c("Country", "SalesCountry")
+countriesLeastSelling <- subset(purchasesNotUk, SalesCountry <= 80000)
+otherCountries <- data.frame(Country="Others",SalesCountry=sum(countriesLeastSelling[[2]]))
 
 countriesTopSelling <- rbind(countriesTopSelling,otherCountries)
 slicesTopSelling <- countriesTopSelling[[2]]
@@ -180,17 +180,16 @@ boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline 
 #Invoices per month in 2011
 
 #Check format of dates
-onlineRetailUnique$InvoiceDate <- mdy_hm(onlineRetailUnique$InvoiceDate)
-
+onlineRetailUnique$InvoiceDate <- parse_date_time(onlineRetailUnique$InvoiceDate, c( "%m/%d/%y %H:%M","%d/%m/%y %H:%M"), exact = T)
 #Creating object for date's year
 onlineRetailUnique$InvoiceYear <- year(onlineRetailUnique$InvoiceDate)
 #Creating object for date's month
 onlineRetailUnique$InvoiceMonth <- month(onlineRetailUnique$InvoiceDate,label=T)
 #Creating object for date's day
-onlineRetailClean$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=T)
+onlineRetailUnique$InvoiceWeekday <- wday(onlineRetailUnique$InvoiceDate, label=T)
 #Creating object for date's hour
-onlineRetailClean$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
-View(onlineRetailUnique)
+onlineRetailUnique$InvoiceHour <- hour(onlineRetailUnique$InvoiceDate)
+
 #Number of invoices per month in 2011
 #Filter to select year 2011 and count invoices for each month
 monthData <- onlineRetailUnique %>% 
@@ -586,7 +585,7 @@ text(clusteringCountries[,c("Axis1","Axis2")], labels=rownames(clusteringCountri
 
 #Cluster on words usage
 
-uniqueDescriptionList <- onlineRetailClean[!duplicated(onlineRetailClean[,c('Description')]),]
+uniqueDescriptionList <- onlineRetailUnique[!duplicated(onlineRetailUnique[,c('Description')]),]
 uniqueDescriptionList <- uniqueDescriptionList[c("StockCode", "Description")]
 #Putting a name for col description
 names(uniqueDescriptionList) <- c("StockCode","Description")
