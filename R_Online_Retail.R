@@ -500,13 +500,10 @@ countriesClustering.R <- as.matrix(scale(countriesClustering))
 #Elbow Method for finding the optimal number of clusters
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
-<<<<<<< HEAD
+
 k.max <- 15
 data <- countriesClustering.R
-=======
-k.max <- 10
-data <- scaled_data
->>>>>>> 72b0e87735cdad7a82e521b954d1f9a5abfc2f5a
+
 wss <- sapply(1:k.max, 
               function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
 wss
