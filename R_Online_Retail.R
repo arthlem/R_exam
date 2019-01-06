@@ -487,47 +487,78 @@ plot(1:k.max, wss,
 #We find the optimal number of clusters at 5, k = 5
 abline(v = 5, lty =2)
 
-#---------TEST-------
+productClustering.PCA <- dudi.pca(productClustering, scannf = FALSE, nf = 5, center = TRUE, scale = TRUE)
+
+
+#J'introduis mon ACP dans le DataSet
+productClusteringWithPCA <- cbind(productClustering.R, productClustering.PCA$li)
+
+#Compute the kmeans
+productClustering.km <- kmeans(productClusteringWithPCA[,1:5], centers = 5, iter.max = 10, nstart = 10)
+
+#See how many data each cluster contains
+table(productClustering.km$cluster)
+
+#Show the centers
+productClustering.km$centers
+
+#Show the different clusters
+pairs(productClusteringWithPCA[,1:5],col=productClustering.km$cluster)
+
+#Create a scatterplotmatrix
+scatterplotMatrix(productClusteringWithPCA[,1:5],smooth=FALSE,groups=productClustering.km$cluster, by.groups=TRUE)
+
+pairs(productClusteringWithPCA[,1:5],col=productClustering.km$cluster)
+
+aggregate(productClusteringWithPCA[,1:5], list(productClustering.km$cluster), mean)
+
+#Final Result
+plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
+text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
+
+View(productClusteringWithPCA)
+
+
 
 # KMeans with k=5, 10 iterations for each kmeans, 10 kmeans tried..
-km1 <- kmeans(mydata[,1:4], centers = 5, iter.max = 10, nstart = 10)
+km1 <- kmeans(productClustering[,1:4], centers = 5, iter.max = 10, nstart = 10)
 
 # Size of the clusters
 table(km1$cluster)
 # Clusters Centers
 km1$centers
 # Plot of the clusters
-pairs(mydata[,1:4],col=km1$cluster)
+pairs(productClustering[,1:4],col=km1$cluster)
 # Chargement du package "car" pour utiliser sa fonction scatterplotMatrix
 library(car)
-scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
+scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km1$cluster, by.groups=TRUE)
 
 # Representation of clusters in the 2 first principal components
-plot(mydata[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
+plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
 
 
 # Same algorithm, but on scaled data.
-km2 <- kmeans(scale(mydata[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
+km2 <- kmeans(scale(productClustering[,1:4],center = TRUE,scale=TRUE), centers = 3, iter.max = 10, nstart = 10)
 # Size of the clusters
 table(km2$cluster)
 # Clusters Centers (with no direct meaning!)
 km2$centers
 # Cluster center on initial variables
-aggregate(mydata[,1:4], list(km2$cluster), mean)
+aggregate(productClustering[,1:4], list(km2$cluster), mean)
 
 # Representation of clusters in the 2 first principal components
-plot(mydata[,c("Axis1","Axis2")], col=km2$cluster)
-scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
-scatterplotMatrix(mydata[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
-cor(mydata[,1:4])
+plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster)
+scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=TRUE)
+scatterplotMatrix(productClustering[,1:4],smooth=FALSE,groups=km2$cluster, by.groups=FALSE)
+cor(productClustering[,1:4])
 
 # Comparison of the two results
-plot(mydata[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
-plot(mydata[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
+plot(productClustering[,c("Axis1","Axis2")], col=km1$cluster, main="K-means")
+plot(productClustering[,c("Axis1","Axis2")], col=km2$cluster, main="K-means on scaled data")
 
 # Plot with labels
-plot(mydata[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
-text(mydata[,c("Axis1","Axis2")], labels=rownames(mydata), col=km2$cluster, main="K-means on scaled data", cex=0.7)
+plot(productClustering[,c("Axis1","Axis2")], col="white", main="K-means on scaled data")
+text(productClustering[,c("Axis1","Axis2")], labels=rownames(productClustering), col=km2$cluster, main="K-means on scaled data", cex=0.7)
 
 
 
