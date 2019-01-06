@@ -74,7 +74,7 @@ afterCancelations <- nrow(onlineRetailClean)
 #Number of records removed
 beforeCancelations - afterCancelations
 
-#Remove other records that aren't orders
+#Remove other records that aren't considered orders
 #Remove POSTAGE
 onlineRetailClean <- subset(onlineRetailClean, StockCode != "POST")
 
@@ -111,17 +111,21 @@ dim(onlineRetailClean)-dim(onlineRetailUnique)
 onlineRetailUnique <- onlineRetailUnique %>% 
   mutate(TotalPrice = Quantity*UnitPrice)
 
-#----ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
+#----C. ANALYSIS OF THE DATA - DESCRIPTIVE STATISTICS----
 
+#VARIABLES
 #1. Number of invoices (orders)
 listOfInvoices <- onlineRetailUnique["InvoiceNo"]
 length(listOfInvoices[!duplicated(listOfInvoices), ])
+
 #2. Number of products
 listOfProducts <- onlineRetailUnique["StockCode"]
 length(listOfProducts[!duplicated(listOfProducts), ])
+
 #3. Number of Countries
 listOfCountry <- onlineRetailUnique["Country"]
 length(listOfCountry[!duplicated(listOfCountry), ])
+
 #4. Number of Customers
 listOfCustomers <- onlineRetailUnique["CustomerID"]
 length(listOfCustomers[!duplicated(listOfCustomers), ])
@@ -134,7 +138,7 @@ summary(purchasesPerCountry[2])
 #6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
-#7. Group the quanty and the purchases (and quantity) for each invoices
+#7. Group the quantity and the purchases for each invoices
 purchasesPerInvoice <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$InvoiceNo), FUN=sum)
 quantityPerInvoice <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$InvoiceNo), FUN=sum)
 invoiceData <- merge(purchasesPerInvoice, quantityPerInvoice, by="Category")
@@ -145,14 +149,17 @@ names(invoiceData) <- c("InvoiceNO","Sales Invoice","Quantity")
 purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
 slices2 <- c(purchaseUk[[2]],sum(purchasesNotUk[[2]]))
 lbls2 <- c("United Kingdom", "Others")
-pie(slices2, labels = lbls2, main="Pie Chart of Sales")
+pctAllCountries <- round(slices2/sum(slices2)*100)
+lbls2 <- paste(lbls2, pctAllCountries) # add percents to labels 
+lbls2 <- paste(lbls2,"%",sep="") # ad % to labels 
+pie(slices2, labels = lbls2, main="Pie Chart of Sales - All Countries")
 
 #Piechart with sales out of the United Kingdom
 slicesNotUK <- purchasesNotUk[[2]]
 lblsNotUK <- purchasesNotUk[[1]]
 pie(slicesNotUK, labels = lblsNotUK, main="Pie Chart of Sales - Out of the UK")
 
-#Piechart with the countries with the most returns Out of the UK
+#Piechart summarizing countries with the most returns Out of the UK
 countriesTopSelling <- subset(purchasesNotUk, SalesCountry > 80000)
 names(countriesTopSelling) = c("Country", "SalesCountry")
 countriesLeastSelling <- subset(purchasesNotUk, SalesCountry <= 80000)
@@ -165,7 +172,7 @@ lblsTopSelling <- countriesTopSelling[[1]]
 pctTopSelling <- round(slicesTopSelling/sum(slicesNotUK)*100)
 lblsTopSelling <- paste(lblsTopSelling, pctTopSelling)
 lblsTopSelling <- paste(lblsTopSelling,"%",sep="")
-pie(slicesTopSelling, labels = lblsTopSelling, main="5 best selling countries out of UK")
+pie(slicesTopSelling, labels = lblsTopSelling, main="Summary of sales - UK excl.")
 
 #BOXPLOTS
 #Sales per product
