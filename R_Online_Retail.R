@@ -493,15 +493,15 @@ scatter(pcaCountryWithoutUKAde4, posieig="none", clab.row=0)
 
 #-----COMPUTE THE NUMBER OF CLUSTERS-----
 #Prepare the data
-clusteringCountries <- countryDataWithoutUK
+countriesClustering <- countryDataWithoutUK
 
-scaled_data = as.matrix(scale(clusteringCountries))
+countriesClustering.R <- as.matrix(scale(countriesClustering))
 
 #Elbow Method for finding the optimal number of clusters
 set.seed(123)
 # Compute and plot wss for k = 2 to k = 15.
-k.max <- 5
-data <- scaled_data
+k.max <- 15
+data <- countriesClustering.R
 wss <- sapply(1:k.max, 
               function(k){kmeans(data, k, nstart=50,iter.max = 15 )$tot.withinss})
 wss
@@ -512,35 +512,33 @@ plot(1:k.max, wss,
 abline(v = 3, lty =2)
 
 #-----COMPUTE THE CLUSTERS-----
-#J'introduis mon dataset dans mydata
-clusteringCountries2 <- countryDataWithoutUK
 
 #Je calcule mon ACP pour l'introduire dans mon dataset qui est centré
-clusteringCountries2.PCA <- dudi.pca(clusteringCountries2, scannf = FALSE, nf = 4, center = TRUE, scale = TRUE)
+countriesClustering.PCA <- dudi.pca(countriesClustering, scannf = FALSE, nf = 4, center = TRUE, scale = TRUE)
 
 #J'introduis mon ACP dans le DataSet
-clusteringCountries2 <- cbind(clusteringCountries2, clusteringCountries2.PCA$li)
+countriesClusteringWithPCA <- cbind(countriesClustering, countriesClustering.PCA$li)
 
 #Compute the kmeans
-clusteringCountries2.km <- kmeans(scale(clusteringCountries2[,1:4]), centers = 3, iter.max = 10, nstart = 10)
+countriesClustering.km <- kmeans(scale(countriesClustering[,1:4]), centers = 3, iter.max = 10, nstart = 10)
 
 #See how many data each cluster contains
-table(clusteringCountries2.km$cluster)
+table(countriesClustering.km$cluster)
 
 #Show the centers
-clusteringCountries2.km$centers
+countriesClustering.km$centers
 
 #Show the different clusters
-pairs(clusteringCountries2[,1:4],col=clusteringCountries2.km$cluster)
+pairs(countriesClustering[,1:4],col=countriesClustering.km$cluster)
 
 #Create a scatterplotmatrix
-scatterplotMatrix(clusteringCountries2[,1:4],smooth=FALSE,groups=clusteringCountries2.km$cluster, by.groups=TRUE)
+scatterplotMatrix(countriesClustering[,1:4],smooth=FALSE,groups=countriesClustering.km$cluster, by.groups=TRUE)
 
-aggregate(clusteringCountries2[,1:4], list(clusteringCountries2.km$cluster), mean)
+aggregate(countriesClustering[,1:4], list(countriesClustering.km$cluster), mean)
 
 #Final Result
-plot(clusteringCountries2[,c("Axis1","Axis2")], col="white", main="K-means")
-text(clusteringCountries2[,c("Axis1","Axis2")], labels=rownames(clusteringCountries2), col=clusteringCountries2.km$cluster, main="K-means on scaled data", cex=0.50)
+plot(countriesClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
+text(countriesClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(countriesClustering), col=countriesClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 
 #----A EFFACER (SAUF WORDCLOUD!!)----
 
@@ -593,8 +591,6 @@ aggregate(productClusteringWithPCA[,1:5], list(productClustering.km$cluster), me
 #Final Result
 plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
-
-View(productClusteringWithPCA)
 
 
 
