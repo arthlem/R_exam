@@ -134,6 +134,12 @@ summary(purchasesPerCountry[2])
 #6. Create another variable to analyse the data out of the UK
 purchasesNotUk <- purchasesPerCountry[- grep("United Kingdom", purchasesPerCountry$Country),]
 
+#7. Group the quanty and the purchases (and quantity) for each invoices
+purchasesPerInvoice <- aggregate(onlineRetailUnique$Quantity*onlineRetailUnique$UnitPrice, by=list(Category=onlineRetailUnique$InvoiceNo), FUN=sum)
+quantityPerInvoice <- aggregate(onlineRetailUnique$Quantity, by=list(Category=onlineRetailUnique$InvoiceNo), FUN=sum)
+invoiceData <- merge(purchasesPerInvoice, quantityPerInvoice, by="Category")
+names(invoiceData) <- c("InvoiceNO","Sales Invoice","Quantity")
+
 #PIECHARTS
 #PieChart with all countries
 purchaseUk <- purchasesPerCountry[grep("United Kingdom", purchasesPerCountry$Country),]
@@ -171,8 +177,11 @@ View(salesPerProduct)
 boxplot(salesPerProduct[2], main= "Sales per product", horizontal = TRUE, outline = FALSE,las=2)
 summary(salesPerProduct[2])
 
-#Boxplot of the Quantity
-boxplot(onlineRetailUnique[,c(4)], main= "Quantity", horizontal = TRUE, outline = FALSE,las=2)
+#Boxplot of the Quantity per Invoice
+boxplot(invoiceData[3], main= "Quantity per invoice", horizontal = TRUE, outline = FALSE,las=2)
+
+#Sales sumary per invoice
+summary(invoiceData[2])
 
 #GRAPHS
 #Invoices per month in 2011
@@ -281,11 +290,16 @@ names(countryPerPurchases) <- c("Country","Turnover")
 countryPerCustomers <- aggregate(onlineRetailUnique$CustomerID, by=list(Category=onlineRetailUnique$Country), FUN=length)
 names(countryPerCustomers) <- c("Country","NbOfCustomers")
 
+#(d) Create a dataset with aggregate() by combining the Country with the nbOfInvoice and then change the variables names with names()
+countryPerInvoice <- aggregate(onlineRetailUnique$InvoiceNo, by=list(Category=onlineRetailUnique$Country), FUN=length)
+names(countryPerInvoice) <- c("Country","NbOfInvoice")
+
 #Merge the dataset to make countryData
 countryData <- merge(countryPerStockCode, countryPerPurchases, by="Country")
 countryData <- merge(countryData, countryPerCustomers, by="Country")
+countryData <- merge(countryData, countryPerInvoice, by="Country")
 row.names(countryData) <- countryData$Country
-countryData <- countryData[2:4]
+countryData <- countryData[2:5]
 
 #Merged dataset for our PCA of the Countries
 View(countryData)
@@ -346,6 +360,11 @@ score(pcaProductAde4, xax=2)
 # right angle = zero;
 # obtuse angle = negative.
 s.corcircle(pcaProductAde4$co)
+
+#Data projection with the new axis
+scatter(pcaProductAde4, posieig="none")
+#Data projection with the new axis (but with dot)
+scatter(pcaProductAde4, posieig="none", clab.row=0)
 
 #----PCA:COUNTRY-----
 
