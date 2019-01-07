@@ -47,6 +47,8 @@ load("data.RData")
 5. Clustering
 6. Bonus
 
+# 1. Analyse des données importées
+
 ##1. Analyse des données importées
 
 ### <b>Introduction</b>
@@ -81,6 +83,8 @@ cat("Du",as.character(head(select(onlineRetail, InvoiceDate), 1)[[1]]), "au", as
 cat(nrow(onlineRetail), "lignes dans le dataset")
 ```
 
+# 2. Nettoyage des données
+
 ## 2. Nettoyage des données
 ### <b>a. Données non pertinentes</b>
 <font size="4"> 
@@ -105,6 +109,8 @@ cat(nrow(onlineRetailClean), "lignes après nettoyage")
 cat(nrow(onlineRetailUnique), "lignes après suppression des doublons")
 cat("Pourcentage nettoyé :", 100 - (nrow(onlineRetailUnique)/nrow(onlineRetail)*100), "%")
 ```
+
+# 3. Statistiques descriptives
 
 ## 3. Statistiques descriptives
 ### <b>Introduction</b>
@@ -181,6 +187,9 @@ ggplot(SalesData, aes(InvoiceMonth, CA*turnoverByMonthScale)) +
   geom_text(aes(label=format(round(CA*turnoverByMonthScale, 2), nsmall = 2)), vjust=1.6, color="white", size=3.5)
 ```
 
+
+# 4. PCA
+
 ## 4.1 PCA pays
 ### Agrégation des données de tous les pays
 ```{r comment=NA}
@@ -248,7 +257,6 @@ s.corcircle(pcaCountryWithoutUKAde4$co)
 scatter(pcaCountryWithoutUKAde4, posieig="none")
 ```
 
-
 ## 4.2 PCA produits
 ### Agrégation de tous les produits
 ```{r comment=NA}
@@ -311,6 +319,8 @@ s.corcircle(pcaProductAde4$co)
 scatter(pcaProductAde4, posieig = "none", clab.row = 0)
 ```
 
+# 5. Clustering
+
 ## 5.1 Clustering des pays 
 ### Calcul du nombre de clusters (Elbow Method)
 ```{r comment=NA}
@@ -370,8 +380,9 @@ plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 ```
 
+# 6. Bonus
 
-## 6. Bonus: Wordcloud
+## 6. Wordcloud
 ```{r fig.align="center"}
 set.seed(4363)
 
