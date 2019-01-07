@@ -45,7 +45,8 @@ load("data.RData")
 3. Statistiques descriptives
 4. Analyse des composantes principales (ACP)
 5. Clustering
-6. Bonus
+6. Conclusion
+7. Bonus
 
 # 1. Analyse des données importées
 
@@ -146,6 +147,7 @@ pie(slicesTopSelling, labels = lblsTopSelling, main="Résumé des ventes hors UK
 ```{r comment=NA}
 summary(invoiceData$`Sales Invoice`)
 boxplot(invoiceData[2], main= "CA par facture", horizontal = TRUE, outline = FALSE,las=2)
+abline(v = 474.80, lty=2, col="red")
 ```
 
 ## 3. Statistiques descriptives
@@ -380,9 +382,23 @@ plot(productClusteringWithPCA[,c("Axis1","Axis2")], col="white", main="K-means")
 text(productClusteringWithPCA[,c("Axis1","Axis2")], labels=rownames(productClustering), col=productClustering.km$cluster, main="K-means on scaled data", cex=0.50)
 ```
 
-# 6. Bonus
+# 6. Conclusion
 
-## 6. Wordcloud
+## 6. Conclusion
+```{r comment=NA}
+cat("Nettoyage important des données (28%).\n\n")
+cat("Identifier les meilleurs moments de promotion.\n   -Jeudi\n   -De 12 à 14h\n\n")
+cat("Le prix moyen a peu d'influence sur les autres variables (PCA produits).\n\n")
+cat("Beaucoup de produits et consommateurs différents (PCA pays)\n   Peu de détaillants\n\n")
+cat("Cluster sur les produits: tri sur les produits.\n\n")
+cat("Clustering des pays permet de mieux catégoriser.")
+```
+
+
+
+# 7. Bonus
+
+## 7. Wordcloud
 ```{r fig.align="center"}
 set.seed(4363)
 
